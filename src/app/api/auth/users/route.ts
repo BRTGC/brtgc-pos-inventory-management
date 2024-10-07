@@ -13,7 +13,7 @@ export async function POST(request: Request) {
       data: {
         name,
         email,
-        role, // You may specify a role if required
+        role,
       },
     });
 

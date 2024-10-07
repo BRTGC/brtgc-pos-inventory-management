@@ -2,10 +2,12 @@ import { useState } from 'react';
 import { FiMenu, FiPackage, FiSettings, FiUser, FiLogOut, FiX } from 'react-icons/fi';
 import { FaShoppingCart, FaFileAlt } from 'react-icons/fa';
 import { MdDashboard } from 'react-icons/md';
+import { useSession } from 'next-auth/react';
 
 const MobileSidebar = () => {
     const [menuOpen, setMenuOpen] = useState(false);
     const [inventoryDropdown, setInventoryDropdown] = useState(false);
+    const { data: session } = useSession();
 
     return (
         <nav className="bg-gray-800 text-white relative">
@@ -77,12 +79,14 @@ const MobileSidebar = () => {
                                     >
                                         View Products
                                     </a>
-                                    <a
-                                        href="/products/add-new"
-                                        className="block px-4 py-2 hover:bg-gray-600 transition-colors"
-                                    >
-                                        Add Products
-                                    </a>
+                                    {session?.user.role === 'ADMIN' && (
+                                        <a
+                                            href="/products/add-new"
+                                            className="block px-4 py-2 hover:bg-gray-600 transition-colors"
+                                        >
+                                            Add Products
+                                        </a>
+                                    )}
                                     <a
                                         href="/inventory/low-stock"
                                         className="block px-4 py-2 hover:bg-gray-600 transition-colors"

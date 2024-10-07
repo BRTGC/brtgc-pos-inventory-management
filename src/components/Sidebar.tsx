@@ -2,9 +2,11 @@ import { useState } from 'react';
 import { FiPackage, FiSettings, FiUser, FiLogOut } from 'react-icons/fi';
 import { FaShoppingCart, FaFileAlt } from 'react-icons/fa';
 import { MdDashboard } from 'react-icons/md';
+import { useSession } from 'next-auth/react';
 
 const Navbar = () => {
   const [inventoryDropdown, setInventoryDropdown] = useState(false);
+  const { data: session } = useSession();
 
   return (
     <nav className="bg-gray-800 fixed text-white px-4 py-3 w-full">
@@ -54,12 +56,14 @@ const Navbar = () => {
                 >
                   View Products
                 </a>
-                <a
-                  href="/products/add-new"
-                  className="block px-4 py-2 hover:bg-gray-600 transition-colors"
-                >
-                  Add Products
-                </a>
+                {session?.user.role === 'ADMIN' && (
+                  <a
+                    href="/products/add-new"
+                    className="block px-4 py-2 hover:bg-gray-600 transition-colors"
+                  >
+                    Add Products
+                  </a>
+                )}
                 <a
                   href="/products/low-stocks"
                   className="block px-4 py-2 hover:bg-gray-600 transition-colors"

@@ -1,9 +1,7 @@
-// src/app/api/auth/[...nextauth]/route.ts
-
 import NextAuth from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import bcrypt from 'bcryptjs';
-import prisma from '../../../../../prisma';
+import prisma from '../../../../../prisma'; // Import Prisma client
 
 export const authOptions = {
   providers: [
@@ -14,23 +12,23 @@ export const authOptions = {
         password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials) {
+        // Fetch user from database
         const user = await prisma.user.findUnique({
           where: { email: credentials?.email },
         });
 
-        // Check if user exists and password matches
-        if (user && (await bcrypt.compare(credentials?.password, user.password))) {
+        // Verify user exists and password matches
+        if (user && (await bcrypt.compare(credentials.password, user.password))) {
           return {
             id: user.id,
             username: user.username,
             email: user.email,
-            name: user.name, // Include additional fields
+            name: user.name,
             role: user.role,
-            // Add any other user details you want to store
-          }; 
+          };
         }
 
-        return null; // Return null if user data could not be retrieved
+        return null; // Authentication failed
       },
     }),
   ],
@@ -40,30 +38,30 @@ export const authOptions = {
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.id = user.id; // Store user ID in token
-        token.role = user.role; // Store user role in token
-        token.username = user.username; // Store user role in token
-        token.email = user.email; // Store user email
-        token.name = user.name; // Store user name
-        // Add any additional user details here
+        token.id = user.id;
+        token.role = user.role;
+        token.username = user.username;
+        token.email = user.email;
+        token.name = user.name;
       }
       return token;
     },
     async session({ session, token }) {
-      session.user.id = token.id; // Add user ID to session
-      session.user.role = token.role; // Add user role to session
-      session.user.username = token.username; // Add user role to session
-      session.user.email = token.email; // Add user email to session
-      session.user.name = token.name; // Add user name to session
-      // Add any additional user details here
+      session.user.id = token.id;
+      session.user.role = token.role;
+      session.user.username = token.username;
+      session.user.email = token.email;
+      session.user.name = token.name;
       return session;
     },
   },
   session: {
     strategy: 'jwt',
+    maxAge: 60 * 60, // 1 hour session timeout
   },
+  secret: process.env.NEXTAUTH_SECRET, // Ensure you have this in your .env file
 };
 
 const handler = NextAuth(authOptions);
 
-export { handler as GET, handler as POST }; // Export GET and POST methods
+export { handler as GET, handler as POST };

@@ -1,3 +1,4 @@
+// src/app/layout.tsx
 import type { Metadata } from "next";
 import "./globals.css";
 import SessionProviderWrapper from '../components/SessionProviderWrapper';
@@ -9,12 +10,13 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html lang="en">
       <body>
+        {/* SessionProviderWrapper can still be used as a Client Component */}
         <SessionProviderWrapper>{children}</SessionProviderWrapper>
       </body>
     </html>

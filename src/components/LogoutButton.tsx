@@ -2,31 +2,24 @@
 
 "use client"; // Mark this file as a Client Component
 
-import { useRouter } from 'next/navigation';
+import { signOut } from 'next-auth/react';
 
 const LogoutButton = () => {
-  const router = useRouter();
-
   const handleLogout = async () => {
-    const res = await fetch('/api/auth/logout', {
+    const response = await fetch('/api/auth/logout', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
     });
-
-    if (res.ok) {
-      router.push('/login'); // Redirect to login page after logout
+    
+    if (response.ok) {
+      signOut({ redirect: true, callbackUrl: '/login' }); // Redirect to login after signing out
     } else {
-      const error = await res.json();
-      console.error(error); // Handle error accordingly
+      const data = await response.json();
+      alert(data.error || 'Logout failed.');
     }
   };
 
   return (
-    <button 
-      onClick={handleLogout} 
-      className="mt-4 p-2 bg-red-500 text-white rounded">
+    <button onClick={handleLogout} className="btn btn-danger">
       Logout
     </button>
   );

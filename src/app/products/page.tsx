@@ -1,6 +1,7 @@
 "use client";
 import Layout from '@/components/Layout';
 import withLayout from '@/components/withLayout';
+import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
@@ -11,6 +12,7 @@ const ProductsPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [sortOrder, setSortOrder] = useState('name');
+  const { data: session } = useSession();
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -84,7 +86,9 @@ const ProductsPage = () => {
     <div className="max-w-6xl mx-auto p-4">
       <div className='flex justify-between items-center my-2'>
         <h1 className="sm:text-3xl text-2xl font-bold mb-4">Product List</h1>
-        <a href="/products/add-new" className='sm:px-4 px-2 sm:py-2 py-1 bg-gray-400 sm:text-lg text-base text-white font-semibold rounded-md'>Add Product</a>
+        {session?.user.role === 'ADMIN' && (
+          <a href="/products/add-new" className='sm:px-4 px-2 sm:py-2 py-1 bg-gray-400 sm:text-lg text-base text-white font-semibold rounded-md'>Add Product</a>
+        )}
       </div>
 
       {/* Search Bar */}

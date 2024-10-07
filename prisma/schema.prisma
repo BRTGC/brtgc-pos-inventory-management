@@ -6,7 +6,6 @@
 
 // prisma/schema.prisma
 
-
 generator client {
   provider = "prisma-client-js"
   previewFeatures = ["mongodb"]
@@ -18,15 +17,15 @@ datasource db {
 }
 
 model User {
-  id       String        @id @default(auto()) @map("_id") @db.ObjectId
-  name     String
-  username     String
-  email    String        @unique
-  password String        // New field for password storage
-  role     UserRole
-  products UserProduct[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id        String        @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
+  username  String
+  email     String        @unique
+  password  String        // New field for password storage
+  role      UserRole
+  products  UserProduct[]
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
 }
 
 model Product {
@@ -42,6 +41,23 @@ model Product {
   dateAdded         DateTime       @default(now())  // Date product was added
   inventory         Inventory[]    // Relationship with Inventory
   users             UserProduct[]  // Relationship with UserProduct
+  sales             SaleProduct[]  // Relationship with SaleProduct
+}
+
+model Sale {
+  id            String        @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt     DateTime      @default(now())
+  paymentMethod String
+  saleProducts  SaleProduct[]  // This line establishes the relation
+}
+
+model SaleProduct {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  sale      Sale     @relation(fields: [saleId], references: [id])
+  saleId    String   @db.ObjectId
+  product   Product  @relation(fields: [productId], references: [id])
+  productId String   @db.ObjectId
+  quantity  Int
 }
 
 model UserProduct {
@@ -49,8 +65,8 @@ model UserProduct {
   userId    String @db.ObjectId
   productId String @db.ObjectId
 
-  user    User    @relation(fields: [userId], references: [id])
-  product Product @relation(fields: [productId], references: [id])
+  user      User    @relation(fields: [userId], references: [id])
+  product   Product @relation(fields: [productId], references: [id])
 }
 
 model Inventory {
@@ -59,7 +75,7 @@ model Inventory {
   quantity  Int
   date      DateTime @default(now())
 
-  product Product @relation(fields: [productId], references: [id])
+  product   Product @relation(fields: [productId], references: [id])
 }
 
 enum UserRole {
