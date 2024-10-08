@@ -1,84 +1,56 @@
 // src/app/products/add-new/page.tsx
 
-"use client"
+"use client";
 
-import Layout from '@/components/Layout';
 import withLayout from '@/components/withLayout';
-import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+
+interface FormData {
+  name: string;
+  description: string;
+  price: number;
+  costPrice: number;
+  sku: string;
+  category: string;
+  stock: number;
+  lowStockAlert: number;
+}
 
 const AddNewProduct = () => {
-  const [formData, setFormData] = useState({
-    name: '',
-    description: '',
-    price: 0,
-    costPrice: 0,
-    sku: '',
-    category: '',
-    stock: 0,
-    lowStockAlert: 0,
-  });
+  const { register, handleSubmit, reset } = useForm<FormData>();
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
+  const onSubmit = async (data: FormData) => {
+    try {
+      const res = await fetch('/api/products/add-new', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
 
-    // Convert numeric inputs to their respective types
-    if (name === 'price' || name === 'costPrice') {
-      setFormData((prevData) => ({
-        ...prevData,
-        [name]: parseFloat(value), // Convert to float
-      }));
-    } else if (name === 'stock' || name === 'lowStockAlert') {
-      setFormData((prevData) => ({
-        ...prevData,
-        [name]: parseInt(value, 10), // Convert to integer
-      }));
-    } else {
-      setFormData((prevData) => ({
-        ...prevData,
-        [name]: value,
-      }));
-    }
-  };
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const res = await fetch('/api/products/add-new', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(formData),
-    });
-    if (res.ok) {
-      alert('Product added successfully');
-      setFormData({
-        name: '',
-        description: '',
-        price: 0,
-        costPrice: 0,
-        sku: '',
-        category: '',
-        stock: 0,
-        lowStockAlert: 0,
-      }); // Reset form after submission
-    } else {
-      alert('Failed to add product');
+      if (res.ok) {
+        alert('Product added successfully');
+        reset(); // Reset form after submission
+      } else {
+        alert('Failed to add product');
+      }
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      alert('An error occurred while adding the product.');
     }
   };
 
   return (
     <div className="max-w-md mx-auto p-6 bg-gray-50 rounded-lg shadow-lg border border-gray-200">
       <h1 className="text-3xl font-bold text-center mb-6 text-gray-800">Add New Product</h1>
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit(onSubmit)}>
         <div className="mb-4">
           <label className="block text-sm font-medium text-gray-700" htmlFor="name">
             Product Name
           </label>
           <input
             id="name"
-            name="name"
-            value={formData.name}
-            onChange={handleChange}
+            {...register('name', { required: true })}
             placeholder="Enter product name"
-            required
             className="mt-1 block w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-400 transition duration-150 ease-in-out"
           />
         </div>
@@ -88,11 +60,8 @@ const AddNewProduct = () => {
           </label>
           <textarea
             id="description"
-            name="description"
-            value={formData.description}
-            onChange={handleChange}
+            {...register('description', { required: true })}
             placeholder="Enter product description"
-            required
             className="mt-1 block w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-400 transition duration-150 ease-in-out"
           />
         </div>
@@ -103,11 +72,8 @@ const AddNewProduct = () => {
           <input
             type="number"
             id="price"
-            name="price"
-            value={formData.price}
-            onChange={handleChange}
+            {...register('price', { required: true, valueAsNumber: true })}
             placeholder="Enter price"
-            required
             className="mt-1 block w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-400 transition duration-150 ease-in-out"
           />
         </div>
@@ -118,11 +84,8 @@ const AddNewProduct = () => {
           <input
             type="number"
             id="costPrice"
-            name="costPrice"
-            value={formData.costPrice}
-            onChange={handleChange}
+            {...register('costPrice', { required: true, valueAsNumber: true })}
             placeholder="Enter cost price"
-            required
             className="mt-1 block w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-400 transition duration-150 ease-in-out"
           />
         </div>
@@ -132,11 +95,8 @@ const AddNewProduct = () => {
           </label>
           <input
             id="sku"
-            name="sku"
-            value={formData.sku}
-            onChange={handleChange}
+            {...register('sku', { required: true })}
             placeholder="Enter SKU"
-            required
             className="mt-1 block w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-400 transition duration-150 ease-in-out"
           />
         </div>
@@ -146,11 +106,8 @@ const AddNewProduct = () => {
           </label>
           <input
             id="category"
-            name="category"
-            value={formData.category}
-            onChange={handleChange}
+            {...register('category', { required: true })}
             placeholder="Enter category"
-            required
             className="mt-1 block w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-400 transition duration-150 ease-in-out"
           />
         </div>
@@ -161,11 +118,8 @@ const AddNewProduct = () => {
           <input
             type="number"
             id="stock"
-            name="stock"
-            value={formData.stock}
-            onChange={handleChange}
+            {...register('stock', { required: true, valueAsNumber: true })}
             placeholder="Enter stock quantity"
-            required
             className="mt-1 block w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-400 transition duration-150 ease-in-out"
           />
         </div>
@@ -176,11 +130,8 @@ const AddNewProduct = () => {
           <input
             type="number"
             id="lowStockAlert"
-            name="lowStockAlert"
-            value={formData.lowStockAlert}
-            onChange={handleChange}
+            {...register('lowStockAlert', { required: true, valueAsNumber: true })}
             placeholder="Enter low stock alert threshold"
-            required
             className="mt-1 block w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-400 transition duration-150 ease-in-out"
           />
         </div>

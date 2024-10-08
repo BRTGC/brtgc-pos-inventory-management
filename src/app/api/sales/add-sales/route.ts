@@ -1,44 +1,54 @@
-// src/app/api/sels/add-sales/route.ts
+// src/app/api/sales/add-new/route.ts
 
 import { NextResponse } from 'next/server';
-import prisma from '../../../../../prisma'; // Adjust this import according to your project structure
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
 
 export async function POST(request: Request) {
-    try {
-        const { products, paymentMethod } = await request.json();
+  try {
+    const { products, totalAmount } = await request.json();
 
-        // Ensure there are products to process
-        if (!products || products.length === 0) {
-            return NextResponse.json({ error: 'No products provided' }, { status: 400 });
-        }
+    // Step 1: Create the sales record
+    const sale = await prisma.sales.create({
+      data: {
+        amount: parseFloat(totalAmount), // Ensure amount is a float
+        createdAt: new Date(),
+        saleProducts: {
+          create: products.map((product: any) => ({
+            productName: product.name,
+            quantity: product.quantity,
+            sku: product.sku,
+            productId: product.id, // Using productId from the frontend data
+          })),
+        },
+      },
+    });
 
-        // Create the sale entry
-        const sale = await prisma.sale.create({
-            data: {
-                paymentMethod,
-                products: { // Adjusted to match the relation field
-                    create: products.map((product: { productId: string; quantity: number }) => ({
-                        productId: product.productId,
-                        quantity: product.quantity,
-                    })),
-                },
-            },
-            include: { products: true }, // Include sale products in the response
+    // Step 2: Update the stock for each product sold
+    await Promise.all(
+      products.map(async (product: any) => {
+        // Find the product by its ID
+        const existingProduct = await prisma.product.findUnique({
+          where: { id: product.id }, // Use id to find the product
         });
 
-        // Update the product quantities in the database
-        await Promise.all(
-            products.map(async (product: { productId: string; quantity: number }) => {
-                await prisma.product.update({
-                    where: { id: product.productId },
-                    data: { stock: { decrement: product.quantity } }, // Decrease the stock quantity by the sold amount
-                });
-            })
-        );
+        if (existingProduct) {
+          // Calculate the new stock
+          const newStock = existingProduct.stock - product.quantity;
 
-        return NextResponse.json({ message: 'Sale created successfully', sale });
-    } catch (error) {
-        console.error('Error creating sale:', error);
-        return NextResponse.json({ error: 'Failed to create sale' }, { status: 500 });
-    }
+          // Update the product's stock
+          await prisma.product.update({
+            where: { id: product.id }, // Use id to update the product
+            data: { stock: newStock },
+          });
+        }
+      })
+    );
+
+    return NextResponse.json({ message: 'Sale recorded and stock updated successfully', sale }, { status: 201 });
+  } catch (error) {
+    console.error('Error recording sale:', error);
+    return NextResponse.json({ error: 'Failed to record sale' }, { status: 500 });
+  }
 }

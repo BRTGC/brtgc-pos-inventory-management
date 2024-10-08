@@ -1,36 +1,58 @@
 // src/app/dashboard/page.tsx
+"use client";
 
-import { getServerSession } from 'next-auth';
-import { redirect } from 'next/navigation';
-import { authOptions } from '../api/auth/[...nextauth]/route';
-import LogoutButton from '../../components/LogoutButton';
-import withLayout from '@/components/withLayout';
+import { getSession, signOut } from "next-auth/react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import withLayout from "@/components/withLayout";
+import { User } from "@/types/User"; // Import the User type
 
-const Dashboard = async () => {
-  const session = await getServerSession(authOptions);
+const Dashboard = () => {
+  const [user, setUser] = useState<User | null>(null); // Use the User type
+  const router = useRouter();
 
-  if (!session) {
-    redirect('/login');
+  useEffect(() => {
+    const fetchSession = async () => {
+      const session = await getSession();
+      if (!session) {
+        router.push("/auth/login"); // Redirect to sign in if not authenticated
+      } else {
+        const userFromSession: User = {
+          id: session.user.id,
+          username: session.user.username || "", // Provide a default if username is missing
+          role: session.user.role,
+        };
+
+        setUser(userFromSession); // Set user data from session
+      }
+    };
+
+    fetchSession();
+  }, [router]);
+
+  if (!user) {
+    return <p>Loading...</p>; // Show loading state
   }
 
   return (
-    <div>
-      <h1 className="text-2xl font-bold text-right">Welcome, {session?.user.username}</h1>
-      <p className='text-3xl'>/ <a href="/dashboard" className='text-blue-400 font-medium text-xl'>Dashboard</a></p>
-      <p>Email: {session?.user.email}</p>
-      <p>Role: {session?.user.role}</p>
-
-      {session?.user.role === 'ADMIN' && (
-        <div>
-          <h2 className="text-2xl font-semibold">Admin Actions</h2>
-          <p>You can modify the inventory here.</p>
-          {/* Admin-specific actions go here */}
-        </div>
-      )}
-
-      <LogoutButton />
+    <div className="p-5">
+      <h1 className="text-2xl font-bold">Dashboard</h1>
+      <p className="mt-4">Username: {user.username}</p>
+      <p>Role: {user.role}</p>
+      <button
+        onClick={() => router.push("/profile")} // Redirect to profile page
+        className="mt-4 bg-blue-500 text-white px-4 py-2 rounded"
+      >
+        Go to Profile
+      </button>
+      <button
+        onClick={() => signOut()} // Logout function
+        className="mt-4 ml-4 bg-red-500 text-white px-4 py-2 rounded"
+      >
+        Logout
+      </button>
     </div>
   );
 };
 
-export default withLayout(Dashboard) ;
+export default withLayout(Dashboard);

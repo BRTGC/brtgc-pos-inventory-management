@@ -1,14 +1,5 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
-// prisma/schema.prisma
-
 generator client {
   provider = "prisma-client-js"
-  previewFeatures = ["mongodb"]
 }
 
 datasource db {
@@ -33,35 +24,38 @@ model Product {
   name              String
   description       String
   price             Float
-  costPrice         Float          // Cost price for profit calculation
-  sku               String         // Unique identifier (SKU)
-  category          String         // Product category
-  stock             Int            // Quantity in stock
-  lowStockAlert     Int            // Low stock threshold
-  dateAdded         DateTime       @default(now())  // Date product was added
+  costPrice         Float
+  sku               String
+  category          String
+  stock             Int
+  lowStockAlert     Int
+  dateAdded         DateTime       @default(now())
   inventory         Inventory[]    // Relationship with Inventory
   users             UserProduct[]  // Relationship with UserProduct
   sales             SaleProduct[]  // Relationship with SaleProduct
 }
 
-model Sale {
-  id            String        @id @default(auto()) @map("_id") @db.ObjectId
-  createdAt     DateTime      @default(now())
-  paymentMethod String
-  saleProducts  SaleProduct[]  // This line establishes the relation
+model SaleProduct {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  productName String
+  quantity    Int       @default(1) // Ensure quantity is at least 1
+  sku         String
+  product     Product   @relation(fields: [productId], references: [id]) // Define relation to Product
+  productId   String    @db.ObjectId
+  sale        Sales     @relation(fields: [saleId], references: [id])
+  saleId      String    @db.ObjectId
+  createdAt   DateTime  @default(now()) // Timestamp for when the product was added to the sale
 }
 
-model SaleProduct {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  sale      Sale     @relation(fields: [saleId], references: [id])
-  saleId    String   @db.ObjectId
-  product   Product  @relation(fields: [productId], references: [id])
-  productId String   @db.ObjectId
-  quantity  Int
+model Sales {
+  id            String        @id @default(auto()) @map("_id") @db.ObjectId
+  amount        Float
+  createdAt     DateTime      @default(now())
+  saleProducts  SaleProduct[]  // Relationship with SaleProduct
 }
 
 model UserProduct {
-  id        String @id @default(auto()) @map("_id") @db.ObjectId // Add a single ID field
+  id        String @id @default(auto()) @map("_id") @db.ObjectId
   userId    String @db.ObjectId
   productId String @db.ObjectId
 

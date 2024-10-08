@@ -3,6 +3,7 @@ import { FiMenu, FiPackage, FiSettings, FiUser, FiLogOut, FiX } from 'react-icon
 import { FaShoppingCart, FaFileAlt } from 'react-icons/fa';
 import { MdDashboard } from 'react-icons/md';
 import { useSession } from 'next-auth/react';
+import Image from 'next/image';  // Import next/image
 
 const MobileSidebar = () => {
     const [menuOpen, setMenuOpen] = useState(false);
@@ -14,7 +15,14 @@ const MobileSidebar = () => {
             <div className="container mx-auto flex items-center justify-between px-4 py-3">
                 {/* Logo */}
                 <div className="flex items-center">
-                    <img src="/logo.png" alt="Logo" className="w-10 h-10 mr-2" />
+                    {/* Replace img with Image */}
+                    <Image 
+                        src="/logo.png" 
+                        alt="Logo" 
+                        width={40}  // specify width
+                        height={40} // specify height
+                        className="mr-2" 
+                    />
                     <span className="text-lg font-semibold">BRTGC Inventory System</span>
                 </div>
 
@@ -22,6 +30,7 @@ const MobileSidebar = () => {
                 <button
                     onClick={() => setMenuOpen(!menuOpen)}
                     className="text-white focus:outline-none"
+                    aria-label="Open Menu"
                 >
                     <FiMenu size={30} />
                 </button>
@@ -33,7 +42,8 @@ const MobileSidebar = () => {
                     <div className='flex items-center justify-end mr-10 pt-5'>
                         <button
                             onClick={() => setMenuOpen(!menuOpen)}
-                            className="text-white focus:outline-none text-right"
+                            className="text-white focus:outline-none"
+                            aria-label="Close Menu"
                         >
                             <FiX size={30} />
                         </button>
@@ -53,14 +63,14 @@ const MobileSidebar = () => {
                             <button
                                 onClick={() => setInventoryDropdown(!inventoryDropdown)}
                                 className="w-full flex justify-between px-4 py-2 hover:bg-gray-700 transition-colors"
+                                aria-label="Toggle Products Dropdown"
                             >
                                 <span className="flex items-center">
                                     <FiPackage className="inline mr-2" size={20} />
                                     Products
                                 </span>
                                 <svg
-                                    className={`transform transition-transform ${inventoryDropdown ? 'rotate-180' : 'rotate-0'
-                                        }`}
+                                    className={`transform transition-transform ${inventoryDropdown ? 'rotate-180' : 'rotate-0'}`}
                                     width="20"
                                     height="20"
                                     fill="currentColor"

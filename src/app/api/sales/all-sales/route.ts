@@ -1,7 +1,6 @@
-// src/app/api/sales/all-sales/route.ts
-// src/app/api/sales/all-sales/route.ts
+// pages/api/sales/all-sales.ts
 import { NextResponse } from 'next/server';
-import prisma from '../../../../../prisma';
+import prisma from '../../../../../prisma'; // Ensure this import is correct for your project structure
 
 export async function GET() {
     try {
@@ -9,19 +8,15 @@ export async function GET() {
             include: {
                 saleProducts: {
                     include: {
-                        product: true, // This should work if the relationship is defined correctly
+                        product: true, // Include product details
                     },
                 },
-            },
-            orderBy: {
-                createdAt: 'desc', // Order sales by createdAt timestamp
             },
         });
 
         return NextResponse.json(sales);
     } catch (error) {
-        console.error('Error fetching sales:', error);
-        return NextResponse.json({ error: 'Failed to fetch sales' }, { status: 500 });
+        console.error('Error fetching sales data:', error);
+        return NextResponse.json({ error: 'Error fetching sales data' }, { status: 500 });
     }
 }
-

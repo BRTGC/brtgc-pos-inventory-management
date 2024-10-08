@@ -3,8 +3,20 @@
 import { NextResponse } from 'next/server';
 import prisma from '../../../../../prisma'; // Import your Prisma client instance
 
+// Define the structure of the product request body
+interface ProductRequestBody {
+  name: string;
+  description: string;
+  price: number;
+  costPrice: number;
+  sku: string;
+  category: string;
+  stock: number;
+  lowStockAlert: number;
+}
+
 export async function POST(req: Request) {
-  const body = await req.json();
+  const body: ProductRequestBody = await req.json();
   const {
     name,
     description,
@@ -17,27 +29,25 @@ export async function POST(req: Request) {
   } = body;
 
   try {
-    // Convert numeric fields to appropriate types
     const product = await prisma.product.create({
       data: {
         name,
         description,
-        price: parseFloat(price), // Ensure price is a Float
-        costPrice: parseFloat(costPrice), // Ensure costPrice is a Float
+        price,
+        costPrice,
         sku,
         category,
-        stock: parseInt(stock, 10), // Ensure stock is an Int
-        lowStockAlert: parseInt(lowStockAlert, 10), // Ensure lowStockAlert is an Int
+        stock,
+        lowStockAlert,
       },
     });
 
-    // Return success response with product details
     return NextResponse.json({
       message: 'Product added successfully!',
       product,
     });
   } catch (error) {
-    console.error('Error adding product:', error); // Log the error for debugging
+    console.error('Error adding product:', error);
     return NextResponse.json({ error: 'Failed to add product' }, { status: 500 });
   }
 }

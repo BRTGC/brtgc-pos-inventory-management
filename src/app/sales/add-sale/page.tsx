@@ -1,5 +1,3 @@
-// src/app/sales/new-sales/page.tsx
-
 'use client';
 
 import withLayout from '@/components/withLayout';
@@ -9,7 +7,7 @@ interface Product {
     id: string;
     name: string;
     price: number;
-    sku: string; // Assuming SKU is part of the Product
+    sku: string;
 }
 
 interface SelectedProduct {
@@ -18,20 +16,19 @@ interface SelectedProduct {
 }
 
 const NewSalePage: React.FC = () => {
-    const [searchTerm, setSearchTerm] = useState('');
-    const [products, setProducts] = useState<Product[]>([]); // All products
+    const [searchTerm, setSearchTerm] = useState<string>('');
+    const [products, setProducts] = useState<Product[]>([]);
     const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-    const [quantity, setQuantity] = useState(1); // Set default quantity to 1
+    const [quantity, setQuantity] = useState<number>(1);
     const [selectedProducts, setSelectedProducts] = useState<SelectedProduct[]>(() => {
-        // Load selected products from local storage on initial render
         const savedProducts = localStorage.getItem('selectedProducts');
         return savedProducts ? JSON.parse(savedProducts) : [];
     });
-    const [paymentMethod, setPaymentMethod] = useState('cash');
-    const [message, setMessage] = useState('');
+    const [paymentMethod, setPaymentMethod] = useState<string>('cash');
+    const [message, setMessage] = useState<string>('');
 
-    // Fetch products from the API only once, on mount
+    // Fetch products on mount
     useEffect(() => {
         const fetchProducts = async () => {
             try {
@@ -48,7 +45,7 @@ const NewSalePage: React.FC = () => {
         fetchProducts();
     }, []);
 
-    // Save selected products to local storage whenever they change
+    // Save selected products to local storage
     useEffect(() => {
         localStorage.setItem('selectedProducts', JSON.stringify(selectedProducts));
     }, [selectedProducts]);
@@ -57,22 +54,18 @@ const NewSalePage: React.FC = () => {
         const value = e.target.value;
         setSearchTerm(value);
 
-        // Filter products based on the search term only if there's at least one letter
-        if (value.length > 0) {
-            const filtered = products.filter((product) =>
-                product.name.toLowerCase().includes(value.toLowerCase())
-            );
-            setFilteredProducts(filtered);
-        } else {
-            setFilteredProducts([]); // Clear filtered products if the input is empty
-        }
+        const filtered = products.filter((product) =>
+            product.name.toLowerCase().includes(value.toLowerCase())
+        );
+        setFilteredProducts(filtered);
     };
 
     const handleProductSelect = (product: Product) => {
         setSelectedProduct(product);
-        setQuantity(1); // Reset quantity to 1 when a product is selected
-        setSearchTerm(''); // Clear search field
-        setFilteredProducts([]); // Clear filtered products
+        setQuantity(1);
+        setSearchTerm('');
+        setFilteredProducts([]);
+        setMessage(''); // Clear message when selecting a product
     };
 
     const handleAddProduct = () => {
@@ -81,27 +74,26 @@ const NewSalePage: React.FC = () => {
             return;
         }
 
-        // Check if the selected product already exists in the selectedProducts array
-        const existingProductIndex = selectedProducts.findIndex(
+        const updatedProducts = [...selectedProducts];
+        const existingProductIndex = updatedProducts.findIndex(
             (sp) => sp.product.sku === selectedProduct.sku
         );
 
         if (existingProductIndex !== -1) {
-            // If it exists, update the quantity
-            const updatedProducts = [...selectedProducts];
             updatedProducts[existingProductIndex].quantity += quantity;
-            setSelectedProducts(updatedProducts);
         } else {
-            // If it doesn't exist, add it as a new entry
-            setSelectedProducts((prev) => [
-                ...prev,
-                { product: selectedProduct, quantity },
-            ]);
+            updatedProducts.push({ product: selectedProduct, quantity });
         }
 
-        // Reset fields
+        setSelectedProducts(updatedProducts);
+        resetFields();
+    };
+
+    const resetFields = () => {
         setSelectedProduct(null);
-        setQuantity(1); // Reset quantity to 1 after adding
+        setQuantity(1);
+        setSearchTerm('');
+        setFilteredProducts([]);
     };
 
     const handleRemoveProduct = (index: number) => {
@@ -110,60 +102,58 @@ const NewSalePage: React.FC = () => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setMessage(''); // Reset message
-    
+
         if (selectedProducts.length === 0) {
-            setMessage('Please add at least one product.');
+            setMessage('Please add at least one product to complete the sale.');
             return;
         }
-    
+
+        if (!paymentMethod) {
+            setMessage('Please select a payment method.');
+            return;
+        }
+
+        const totalAmount = selectedProducts.reduce(
+            (acc, sp) => acc + sp.product.price * sp.quantity,
+            0
+        );
+
+        console.log(selectedProducts, paymentMethod, totalAmount.toFixed(2));
+
+        // Send the selected products and payment method to the server
         try {
-            const response = await fetch('/api/sales/add-sales', {
+            const res = await fetch('/api/sales/add-sales', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    products: selectedProducts.map((sp) => ({
-                        productId: sp.product.id,
-                        quantity: sp.quantity,
-                    })),
+                    selectedProducts,
                     paymentMethod,
+                    totalAmount: totalAmount.toFixed(2),
                 }),
             });
-    
-            const data = await response.json();
-    
-            if (response.ok) {
-                setMessage(`Sale created successfully! Total: ${data.total}`); // Adjust if you don't return total from the server
-                // Clear selected products and reset fields
-                setSelectedProducts([]);
-                setPaymentMethod('cash'); // Reset to default payment method
-                localStorage.removeItem('selectedProducts'); // Clear local storage after successful sale
-            } else {
-                // Handle non-200 responses
-                setMessage(data.error || 'An error occurred while creating the sale.'); // Use fallback error message
+
+            if (!res.ok) {
+                const errorResponse = await res.json();
+                throw new Error(errorResponse.message || 'Failed to complete the sale');
             }
+
+            setMessage('Sale completed successfully.');
+            setSelectedProducts([]); // Clear products after submission
+            localStorage.removeItem('selectedProducts'); // Clear localStorage
         } catch (error) {
-            // Handle network or unexpected errors
-            console.error('Error submitting form:', error);
-            setMessage('An unexpected error occurred. Please try again.'); // Provide user-friendly error message
+            setMessage('Failed to complete the sale. Please try again.');
+            console.error(error);
         }
     };
-    
-
-    // Calculate total price of selected products
-    const totalAmount = selectedProducts.reduce(
-        (acc, sp) => acc + sp.product.price * sp.quantity,
-        0
-    );
 
     return (
         <div className="container mx-auto p-4 max-w-4xl">
             <h1 className="text-3xl font-bold mb-6 text-center text-gray-800">Create New Sale</h1>
             <form onSubmit={handleSubmit} className="space-y-6 bg-white shadow-md rounded-lg p-6">
                 {/* Search Product */}
-                <div>
+                <div className="relative">
                     <label htmlFor="productSearch" className="block text-sm font-medium text-gray-700">
                         Search Product
                     </label>
@@ -202,10 +192,10 @@ const NewSalePage: React.FC = () => {
                                 Quantity
                             </label>
                             <input
-                                type="text"
+                                type="number"
                                 id="quantity"
                                 value={quantity}
-                                onChange={(e) => setQuantity(Number(e.target.value))}
+                                onChange={(e) => setQuantity(Math.max(1, Number(e.target.value)))}
                                 className="mt-1 block w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500"
                                 required
                                 min={1}
@@ -224,61 +214,56 @@ const NewSalePage: React.FC = () => {
                 {/* Selected Products List */}
                 {selectedProducts.length > 0 && (
                     <div>
-                        <h3 className="text-lg font-semibold text-gray-800">Selected Products:</h3>
-                        <ul className="border border-gray-300 rounded-md p-4 mt-2 bg-gray-50 space-y-2">
+                        <h3 className="text-lg font-semibold text-gray-800 mb-2">Selected Products:</h3>
+                        <ul className="space-y-2">
                             {selectedProducts.map((sp, index) => (
-                                <li key={index} className="flex justify-between items-center">
-                                    <span className="text-gray-700">
-                                        {sp.product.name} - {sp.quantity} pcs @ &#8358;{sp.product.price.toFixed(2)}
-                                    </span>
-                                    <span className="text-gray-700">
-                                        Total: &#8358;{(sp.product.price * sp.quantity).toFixed(2)}
+                                <li key={index} className="flex justify-between items-center p-2 border border-gray-300 rounded-md bg-gray-50">
+                                    <span>
+                                        {sp.product.name} - {sp.quantity} pcs - &#8358;{(sp.product.price * sp.quantity).toFixed(2)}
                                     </span>
                                     <button
-                                        type="button"
+                                        className="text-red-500 hover:text-red-700"
                                         onClick={() => handleRemoveProduct(index)}
-                                        className="text-red-600 hover:underline ml-4"
                                     >
                                         Remove
                                     </button>
                                 </li>
                             ))}
                         </ul>
+                        <div className="mt-4 font-bold text-lg">
+                            Total Amount: &#8358;{selectedProducts.reduce(
+                                (acc, sp) => acc + sp.product.price * sp.quantity,
+                                0
+                            ).toFixed(2)}
+                        </div>
                     </div>
                 )}
 
-                {/* Total Amount */}
-                <div className="mt-6">
-                    <h3 className="font-semibold text-xl text-gray-800">Total Amount: &#8358;{totalAmount.toFixed(2)}</h3>
-                </div>
-
-                {/* Payment Method */}
-                <div>
-                    <label htmlFor="paymentMethod" className="block text-sm font-medium text-gray-700">
-                        Payment Method
-                    </label>
+                {/* Payment Method Selection */}
+                <div className="mt-4">
+                    <label className="block text-sm font-medium text-gray-700">Payment Method</label>
                     <select
-                        id="paymentMethod"
                         value={paymentMethod}
                         onChange={(e) => setPaymentMethod(e.target.value)}
                         className="mt-1 block w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500"
                     >
                         <option value="cash">Cash</option>
-                        <option value="credit">Transfer</option>
-                        <option value="debit">Credit Card</option>
+                        <option value="card">Card</option>
                     </select>
                 </div>
 
-                {/* Complete Sale Button */}
+                {/* Message */}
+                {message && (
+                    <div className="mt-4 p-2 text-red-700 bg-red-100 rounded-md">{message}</div>
+                )}
+
+                {/* Submit Button */}
                 <button
                     type="submit"
-                    className="mt-4 w-full bg-blue-600 text-white rounded-md p-2 hover:bg-blue-700 transition-colors"
+                    className="w-full bg-blue-600 text-white rounded-md p-2 hover:bg-blue-700 transition-colors"
                 >
                     Complete Sale
                 </button>
-
-                {/* Message */}
-                {message && <p className="mt-2 text-red-500 text-center">{message}</p>}
             </form>
         </div>
     );

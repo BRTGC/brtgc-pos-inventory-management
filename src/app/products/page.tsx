@@ -1,19 +1,54 @@
 "use client";
-import Layout from '@/components/Layout';
+
 import withLayout from '@/components/withLayout';
-import { useSession } from 'next-auth/react';
+import { getSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
+// Define a type for the Product
+type Product = {
+  id: number;
+  name: string;
+  price: number;
+  sku: string;
+  stock: number;
+  category: string;
+};
+
+// Define a type for the SessionUser
+type SessionUser = {
+  role: string; // Changed to allow any string for roles
+  // Add other properties as needed
+};
+
+// Define a type for the Session
+type Session = {
+  user: SessionUser;
+} | null;
+
 const ProductsPage = () => {
   const router = useRouter();
-  const [products, setProducts] = useState([]);
-  const [filteredProducts, setFilteredProducts] = useState([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('');
-  const [sortOrder, setSortOrder] = useState('name');
-  const { data: session } = useSession();
+  const [products, setProducts] = useState<Product[]>([]);
+  const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
+  const [searchTerm, setSearchTerm] = useState<string>('');
+  const [selectedCategory, setSelectedCategory] = useState<string>('');
+  const [sortOrder, setSortOrder] = useState<string>('name');
+  const [session, setSession] = useState<Session>(null);
 
+  useEffect(() => {
+    const fetchSession = async () => {
+      const sessionData = await getSession();
+      setSession(sessionData as Session); // Use type assertion here
+
+      if (!sessionData) {
+        router.push("/auth/login"); // Redirect to sign in if not authenticated
+      }
+    };
+
+    fetchSession();
+  }, [router]);
+
+  // Fetch products on mount
   useEffect(() => {
     const fetchProducts = async () => {
       try {
@@ -31,25 +66,21 @@ const ProductsPage = () => {
   }, []);
 
   useEffect(() => {
-    // Filter and sort products based on the search term and selected category
     const applyFilters = () => {
       let updatedProducts = products;
 
-      // Filter by search term
       if (searchTerm) {
         updatedProducts = updatedProducts.filter(product =>
           product.name.toLowerCase().includes(searchTerm.toLowerCase())
         );
       }
 
-      // Filter by category
       if (selectedCategory) {
         updatedProducts = updatedProducts.filter(product =>
           product.category === selectedCategory
         );
       }
 
-      // Sort products
       if (sortOrder === 'price_asc') {
         updatedProducts.sort((a, b) => a.price - b.price);
       } else if (sortOrder === 'price_desc') {
@@ -64,7 +95,7 @@ const ProductsPage = () => {
     applyFilters();
   }, [searchTerm, selectedCategory, sortOrder, products]);
 
-  const handleDelete = async (id) => {
+  const handleDelete = async (id: number) => {
     try {
       const res = await fetch('/api/products/delete', {
         method: 'DELETE',
@@ -74,11 +105,11 @@ const ProductsPage = () => {
       if (!res.ok) throw new Error('Failed to delete product');
       setProducts(products.filter(product => product.id !== id));
     } catch (error) {
-      alert(error.message);
+      console.log(error);
     }
   };
 
-  const handleEdit = (id) => {
+  const handleEdit = (id: number) => {
     router.push(`/products/edit/${id}`);
   };
 
@@ -91,7 +122,6 @@ const ProductsPage = () => {
         )}
       </div>
 
-      {/* Search Bar */}
       <div className="mb-4">
         <input
           type="text"
@@ -102,39 +132,38 @@ const ProductsPage = () => {
         />
       </div>
 
-      {/* Filter and Sort Options */}
       <div className="flex flex-col sm:flex-row justify-between mb-4">
         <div className="mb-2 sm:mb-0">
-          <label className="mr-2">Filter by Category:</label>
+          <label htmlFor="categorySelect" className="mr-2">Filter by Category:</label>
           <select
+            id="categorySelect"
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
             className="border rounded-lg p-2"
+            aria-label="Filter by category"
           >
             <option value="">All Categories</option>
-            {/* Add category options here */}
             <option value="category1">Category 1</option>
             <option value="category2">Category 2</option>
-            {/* Add more categories as needed */}
           </select>
         </div>
         <div>
-          <label className="mr-2">Sort By:</label>
+          <label htmlFor="sortSelect" className="mr-2">Sort By:</label>
           <select
+            id="sortSelect"
             value={sortOrder}
             onChange={(e) => setSortOrder(e.target.value)}
             className="border rounded-lg p-2"
+            aria-label="Sort by"
           >
             <option value="name">Name</option>
-            <option value="price_desc">Price: Low to High</option>
-            <option value="price_asc">Price: High to Low</option>
+            <option value="price_asc">Price: Low to High</option>
+            <option value="price_desc">Price: High to Low</option>
           </select>
         </div>
       </div>
 
-      {/* Main Content */}
       <div className="bg-gray-100 p-4">
-        {/* Product Grid/List */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredProducts.map((product) => (
             <div key={product.id} className="border rounded-lg p-4 shadow-md">
@@ -161,7 +190,6 @@ const ProductsPage = () => {
         </div>
       </div>
 
-      {/* Pagination */}
       <div className="mt-4 flex justify-center">
         <button className="border py-2 px-4 rounded-lg bg-blue-600 text-white hover:bg-blue-500">
           Previous
