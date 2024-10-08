@@ -171,20 +171,22 @@ const ProductsPage = () => {
               <p className="text-gray-700">Price: ${product.price.toFixed(2)}</p>
               <p className="text-gray-600">SKU: {product.sku}</p>
               <p className="text-gray-600">Stock: {product.stock}</p>
-              <div className="mt-4">
-                <button
-                  className="bg-yellow-500 text-white py-1 px-3 rounded hover:bg-yellow-400 ml-2"
-                  onClick={() => handleEdit(product.id)}
-                >
-                  Edit
-                </button>
-                <button
-                  onClick={() => handleDelete(product.id)}
-                  className="bg-red-500 text-white py-1 px-3 rounded hover:bg-red-400 ml-2"
-                >
-                  Delete
-                </button>
-              </div>
+              {session?.user.role === 'ADMIN' && (
+                <div className="mt-4">
+                  <button
+                    className="bg-yellow-500 text-white py-1 px-3 rounded hover:bg-yellow-400 ml-2"
+                    onClick={() => handleEdit(product.id)}
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => handleDelete(product.id)}
+                    className="bg-red-500 text-white py-1 px-3 rounded hover:bg-red-400 ml-2"
+                  >
+                    Delete
+                  </button>
+                </div>
+              )}
             </div>
           ))}
         </div>
