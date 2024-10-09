@@ -75,4 +75,5 @@ model Inventory {
 enum UserRole {
   ADMIN
   USER
+  GUEST
 }

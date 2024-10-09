@@ -1,13 +1,13 @@
-// src/app/api/auth/[...nextauth]/route.ts
-
-import NextAuth, { AuthOptions } from "next-auth";
+import NextAuth, { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
+import { JWT } from "next-auth/jwt"; // Type for JWT
+import { Session, User } from "next-auth"; // Types for Session and User
 
 const prisma = new PrismaClient();
 
-const authOptions: AuthOptions = {
+const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
       name: "Credentials",
@@ -19,19 +19,16 @@ const authOptions: AuthOptions = {
         role: { label: "Role", type: "text", placeholder: "USER" }, // Role for user
       },
       async authorize(credentials) {
-        // Handle user signup if the credentials are provided
         if (!credentials) {
           throw new Error("No credentials provided");
         }
 
         const { email, password, username, name, role } = credentials;
 
-        // Check if user exists
         let user = await prisma.user.findUnique({
           where: { email },
         });
 
-        // If user does not exist, create a new user
         if (!user) {
           const hashedPassword = await bcrypt.hash(password, 10);
           user = await prisma.user.create({
@@ -40,11 +37,10 @@ const authOptions: AuthOptions = {
               password: hashedPassword,
               username,
               name,
-              role, // Set role passed from client
+              role,
             },
           });
         } else {
-          // If user exists, validate the password
           const isMatch = bcrypt.compareSync(password, user.password);
           if (!isMatch) {
             throw new Error("Invalid email or password");
@@ -62,10 +58,10 @@ const authOptions: AuthOptions = {
     }),
   ],
   pages: {
-    signIn: '/auth/signin',
+    signIn: "/auth/signin",
   },
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user }: { token: JWT; user?: User }) {
       if (user) {
         token.id = user.id;
         token.role = user.role;
@@ -75,7 +71,7 @@ const authOptions: AuthOptions = {
       }
       return token;
     },
-    async session({ session, token }) {
+    async session({ session, token }: { session: Session; token: JWT }) {
       if (token) {
         session.user.id = token.id as string;
         session.user.role = token.role as string;

@@ -1,14 +1,25 @@
-import { useState } from 'react';
-import { FiMenu, FiPackage, FiSettings, FiUser, FiLogOut, FiX } from 'react-icons/fi';
-import { FaShoppingCart, FaFileAlt } from 'react-icons/fa';
+import { useState, useEffect } from 'react';
+import { FiMenu, FiSettings, FiUser, FiLogOut, FiX, FiPackage } from 'react-icons/fi';
+import { FaShoppingCart, FaFileAlt, FaUser } from 'react-icons/fa';
 import { MdDashboard } from 'react-icons/md';
-import { useSession } from 'next-auth/react';
+import { signOut, getSession } from 'next-auth/react';
 import Image from 'next/image';  // Import next/image
 
 const MobileSidebar = () => {
     const [menuOpen, setMenuOpen] = useState(false);
-    const [inventoryDropdown, setInventoryDropdown] = useState(false);
-    const { data: session } = useSession();
+    // const [inventoryDropdown, setInventoryDropdown] = useState(false);
+    const [userRole, setUserRole] = useState<string | null>(null); // Allow string or null
+
+    // Fetch session data using getSession
+    useEffect(() => {
+        const fetchSession = async () => {
+            const session = await getSession();
+            if (session) {
+                setUserRole(session.user?.role as string); // Ensure role is string
+            }
+        };
+        fetchSession();
+    }, []);
 
     return (
         <nav className="bg-gray-800 text-white relative">
@@ -16,12 +27,12 @@ const MobileSidebar = () => {
                 {/* Logo */}
                 <div className="flex items-center">
                     {/* Replace img with Image */}
-                    <Image 
-                        src="/logo.png" 
-                        alt="Logo" 
+                    <Image
+                        src="/logo.png"
+                        alt="Logo"
                         width={40}  // specify width
                         height={40} // specify height
-                        className="mr-2" 
+                        className="mr-2"
                     />
                     <span className="text-lg font-semibold">BRTGC Inventory System</span>
                 </div>
@@ -31,6 +42,7 @@ const MobileSidebar = () => {
                     onClick={() => setMenuOpen(!menuOpen)}
                     className="text-white focus:outline-none"
                     aria-label="Open Menu"
+                    type="button" // Set button type explicitly
                 >
                     <FiMenu size={30} />
                 </button>
@@ -44,6 +56,7 @@ const MobileSidebar = () => {
                             onClick={() => setMenuOpen(!menuOpen)}
                             className="text-white focus:outline-none"
                             aria-label="Close Menu"
+                            type="button" // Set button type explicitly
                         >
                             <FiX size={30} />
                         </button>
@@ -58,12 +71,33 @@ const MobileSidebar = () => {
                             Dashboard
                         </a>
 
+                        {/* Users */}
+                        {userRole === 'ADMIN' && (
+                            <a
+                                href="/users"
+                                className="flex items-center px-4 py-2 hover:bg-gray-700 transition-colors"
+                            >
+                                <FaUser className="inline mr-2" size={20} />
+                                Users
+                            </a>
+                        )}
+
                         {/* Products with Dropdown */}
-                        <div className="relative">
+                        <a
+                            href="/products"
+                            className="flex items-center px-4 py-2 hover:bg-gray-700 transition-colors"
+                        >
+                            <FiPackage className="inline mr-2" size={20} />
+                            Products
+                        </a>
+
+                        {/* Products with Dropdown */}
+                        {/* <div className="relative">
                             <button
                                 onClick={() => setInventoryDropdown(!inventoryDropdown)}
                                 className="w-full flex justify-between px-4 py-2 hover:bg-gray-700 transition-colors"
                                 aria-label="Toggle Products Dropdown"
+                                type="button" // Set button type explicitly
                             >
                                 <span className="flex items-center">
                                     <FiPackage className="inline mr-2" size={20} />
@@ -79,8 +113,6 @@ const MobileSidebar = () => {
                                     <path d="M12 15l-8-8h16z" />
                                 </svg>
                             </button>
-
-                            {/* Dropdown Menu */}
                             {inventoryDropdown && (
                                 <div className="absolute left-0 top-full mt-2 bg-gray-700 rounded shadow-lg z-50 w-full">
                                     <a
@@ -89,7 +121,7 @@ const MobileSidebar = () => {
                                     >
                                         View Products
                                     </a>
-                                    {session?.user.role === 'ADMIN' && (
+                                    {userRole === 'ADMIN' && ( // Only show for admins
                                         <a
                                             href="/products/add-new"
                                             className="block px-4 py-2 hover:bg-gray-600 transition-colors"
@@ -97,15 +129,9 @@ const MobileSidebar = () => {
                                             Add Products
                                         </a>
                                     )}
-                                    <a
-                                        href="/inventory/low-stock"
-                                        className="block px-4 py-2 hover:bg-gray-600 transition-colors"
-                                    >
-                                        Low Stock Alerts
-                                    </a>
                                 </div>
                             )}
-                        </div>
+                        </div> */}
 
                         {/* Sales */}
                         <a
@@ -144,13 +170,14 @@ const MobileSidebar = () => {
                         </a>
 
                         {/* Logout */}
-                        <a
-                            href="/logout"
+                        <button
+                            onClick={() => signOut()}
                             className="flex items-center px-4 py-2 hover:bg-gray-700 transition-colors"
+                            type="button" // Set button type explicitly
                         >
                             <FiLogOut className="inline mr-2" size={20} />
                             Logout
-                        </a>
+                        </button>
                     </div>
                 </div>
             )}

@@ -3,6 +3,7 @@
 import { signIn } from "next-auth/react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { useRouter } from "next/navigation";
+import withLayout from "@/components/withLayout";
 
 // Define the structure of the form data
 interface FormData {
@@ -13,7 +14,7 @@ interface FormData {
   role: string; // Role of the user, defaulting to "USER"
 }
 
-export default function SignUp() {
+const SignUp = () => {
   const { register, handleSubmit, formState: { errors } } = useForm<FormData>();
   const router = useRouter(); // Use Next.js router for navigation
 
@@ -40,12 +41,12 @@ export default function SignUp() {
         onSubmit={handleSubmit(onSubmit)}
         className="bg-white p-8 rounded-lg shadow-md w-full max-w-md"
       >
-        <h2 className="text-2xl font-bold text-center mb-6">Create an Account</h2>
-        
+        <h2 className="text-2xl font-bold text-center mb-6">Add New User</h2>
+
         {/* Name Field */}
         <div className="mb-4">
           <input
-            {...register("name", { required: "Name is required" })} // Register the name field with validation
+            {...register("name", { required: "Name is required" })}
             placeholder="Name"
             className={`w-full p-2 border rounded ${errors.name ? 'border-red-500' : 'border-gray-300'}`}
           />
@@ -55,7 +56,7 @@ export default function SignUp() {
         {/* Username Field */}
         <div className="mb-4">
           <input
-            {...register("username", { required: "Username is required" })} // Register the username field with validation
+            {...register("username", { required: "Username is required" })}
             placeholder="Username"
             className={`w-full p-2 border rounded ${errors.username ? 'border-red-500' : 'border-gray-300'}`}
           />
@@ -65,7 +66,7 @@ export default function SignUp() {
         {/* Email Field */}
         <div className="mb-4">
           <input
-            {...register("email", { required: "Email is required" })} // Register the email field with validation
+            {...register("email", { required: "Email is required" })}
             placeholder="Email"
             className={`w-full p-2 border rounded ${errors.email ? 'border-red-500' : 'border-gray-300'}`}
           />
@@ -75,7 +76,7 @@ export default function SignUp() {
         {/* Password Field */}
         <div className="mb-4">
           <input
-            {...register("password", { required: "Password is required" })} // Register the password field with validation
+            {...register("password", { required: "Password is required" })}
             type="password"
             placeholder="Password"
             className={`w-full p-2 border rounded ${errors.password ? 'border-red-500' : 'border-gray-300'}`}
@@ -89,21 +90,9 @@ export default function SignUp() {
         >
           Sign Up
         </button>
-        
-        {/* Link to Login Page */}
-        <div className="text-center mt-4">
-          <p>
-            Already have an account?{" "}
-            <button
-              type="button"
-              onClick={() => router.push("/auth/login")} // Change to your login page
-              className="text-blue-500 hover:underline"
-            >
-              Login
-            </button>
-          </p>
-        </div>
       </form>
     </div>
   );
 }
+
+export default withLayout(SignUp);

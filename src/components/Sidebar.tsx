@@ -1,22 +1,37 @@
-import { useState } from 'react';
-import { FiPackage, FiSettings, FiUser, FiLogOut } from 'react-icons/fi';
-import { FaShoppingCart, FaFileAlt } from 'react-icons/fa';
+import { useEffect, useState } from 'react';
+import { FiSettings, FiUser, FiLogOut, FiPackage } from 'react-icons/fi';
+import { FaShoppingCart, FaFileAlt, FaUser } from 'react-icons/fa';
 import { MdDashboard } from 'react-icons/md';
-import { useSession } from 'next-auth/react';
+import { getSession, signOut } from 'next-auth/react';
+import Image from 'next/image';
 
 const Navbar = () => {
-  const [inventoryDropdown, setInventoryDropdown] = useState(false);
-  const { data: session } = useSession();
+  // const [inventoryDropdown, setInventoryDropdown] = useState(false);
+  const [userRole, setUserRole] = useState<string | null>(null); // Allow string or null
+
+  // Fetch session data using getSession
+  useEffect(() => {
+    const fetchSession = async () => {
+      const session = await getSession();
+      if (session) {
+        setUserRole(session.user?.role as string); // Ensure role is string
+      }
+    };
+    fetchSession();
+  }, []);
 
   return (
     <nav className="bg-gray-800 fixed text-white px-4 py-3 w-full">
       <div className="container mx-auto flex items-center justify-around">
         {/* Logo */}
         <div className="flex items-center">
-          <img
+          {/* Replace img with Image */}
+          <Image
             src="/logo.png"
             alt="Logo"
-            className="w-12 h-12 mr-3"
+            width={40}  // specify width
+            height={40} // specify height
+            className="mr-2"
           />
           <span className="text-xl font-semibold">BRTGC Inventory System</span>
         </div>
@@ -29,8 +44,25 @@ const Navbar = () => {
             <span>Dashboard</span>
           </a>
 
+          {/* Users */}
+          {userRole === 'ADMIN' && (
+            <a href="/users" className="flex items-center hover:text-gray-300">
+              <FaUser className="mr-2" size={24} />
+              <span>Users</span>
+            </a>
+          )}
+
+          {/* Products */}
+          <a
+            href="/products"
+            className="flex items-center hover:text-gray-300"
+          >
+            <FiPackage className="mr-2" size={24} />
+            <span>Products</span>
+          </a>
+
           {/* Products with Dropdown */}
-          <div className="relative">
+          {/* <div className="relative">
             <button
               onClick={() => setInventoryDropdown(!inventoryDropdown)}
               className="flex items-center hover:text-gray-300"
@@ -56,7 +88,7 @@ const Navbar = () => {
                 >
                   View Products
                 </a>
-                {session?.user.role === 'ADMIN' && (
+                {userRole === 'ADMIN' && (
                   <a
                     href="/products/add-new"
                     className="block px-4 py-2 hover:bg-gray-600 transition-colors"
@@ -64,15 +96,9 @@ const Navbar = () => {
                     Add Products
                   </a>
                 )}
-                <a
-                  href="/products/low-stocks"
-                  className="block px-4 py-2 hover:bg-gray-600 transition-colors"
-                >
-                  Low Stock Alerts
-                </a>
               </div>
             )}
-          </div>
+          </div> */}
           {/* Sales */}
           <a href="/sales" className="flex items-center hover:text-gray-300">
             <FaShoppingCart className="mr-2" size={24} />
@@ -99,10 +125,14 @@ const Navbar = () => {
           </a>
 
           {/* Logout */}
-          <a href="/logout" className="flex items-center hover:text-gray-300">
-            <FiLogOut className="mr-2" size={24} />
-            <span>Logout</span>
-          </a>
+          <button
+            onClick={() => signOut()}
+            className="flex items-center px-4 py-2 hover:bg-gray-700 transition-colors"
+            type="button" // Set button type explicitly
+          >
+            <FiLogOut className="inline mr-2" size={20} />
+            Logout
+          </button>
         </div>
       </div>
     </nav>
