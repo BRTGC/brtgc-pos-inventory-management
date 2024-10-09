@@ -8,7 +8,7 @@ import Link from 'next/link';
 
 const Home = () => {
   const router = useRouter();
-  const { data: session, status } = useSession(); // Use useSession to get session data
+  const { status } = useSession(); // Use useSession to get session data
 
   useEffect(() => {
     // Redirect to the dashboard if the user is authenticated
@@ -40,7 +40,7 @@ const Home = () => {
           Log in to access your inventory management tools and get started!
         </p>
         <div className="flex justify-center mb-6">
-          <Link href="/login">
+          <Link href="/auth/login">
             <button className="bg-blue-500 text-white px-4 py-2 md:px-6 md:py-3 rounded-lg hover:bg-blue-600 transition duration-200">
               Login
             </button>
@@ -50,7 +50,7 @@ const Home = () => {
           What Our Users Say
         </h2>
         <blockquote className="border-l-4 border-blue-500 pl-3 md:pl-4 italic text-gray-600 mb-6 text-sm md:text-base">
-          "The BRTGC Inventory Management System has transformed our operations! We can track our inventory in real-time and make better decisions."
+          &quot;The BRTGC Inventory Management System has transformed our operations! We can track our inventory in real-time and make better decisions.&quot;
         </blockquote>
         <p className="text-gray-600 text-center mb-4 text-sm md:text-base">
           Need assistance? Contact our support team at{' '}
@@ -58,7 +58,7 @@ const Home = () => {
         </p>
       </div>
     </main>
-  );  
+  );
 };
 
 export default Home;

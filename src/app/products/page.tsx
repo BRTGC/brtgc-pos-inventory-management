@@ -13,6 +13,7 @@ type Product = {
   sku: string;
   stock: number;
   category: string;
+  lowStockAlert: number; // Added to handle low stock alerts
 };
 
 // Define a type for the SessionUser
@@ -170,11 +171,19 @@ const ProductsPage = () => {
       <div className="bg-gray-100 p-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredProducts.map((product) => (
-            <div key={product.id} className="border rounded-lg p-4 shadow-md">
+            <div key={product.id} className="border rounded-lg p-4 shadow-md relative">
               <a className="text-xl font-semibold text-blue-500" href='#'>{product.name}</a>
               <p className="text-gray-700">Price: ${product.price.toFixed(2)}</p>
               <p className="text-gray-600">SKU: {product.sku}</p>
               <p className="text-gray-600">Stock: {product.stock}</p>
+
+              {/* Low stock alert */}
+              {product.stock <= product.lowStockAlert && (
+                <div className="absolute top-2 right-2 bg-red-600 text-white py-1 px-3 rounded-lg text-sm">
+                  Low stock
+                </div>
+              )}
+
               {session?.user.role === 'ADMIN' && (
                 <div className="mt-4">
                   <button
