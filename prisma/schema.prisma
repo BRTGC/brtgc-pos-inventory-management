@@ -32,7 +32,7 @@ model Product {
   dateAdded         DateTime       @default(now())
   inventory         Inventory[]    // Relationship with Inventory
   users             UserProduct[]  // Relationship with UserProduct
-  sales             SaleProduct[]  // Relationship with SaleProduct
+  sale             SaleProduct[]  // Relationship with SaleProduct
 }
 
 model SaleProduct {
@@ -42,12 +42,12 @@ model SaleProduct {
   sku         String
   product     Product   @relation(fields: [productId], references: [id]) // Define relation to Product
   productId   String    @db.ObjectId
-  sale        Sales     @relation(fields: [saleId], references: [id])
+  sale        Sale     @relation(fields: [saleId], references: [id])
   saleId      String    @db.ObjectId
   createdAt   DateTime  @default(now()) // Timestamp for when the product was added to the sale
 }
 
-model Sales {
+model Sale {
   id            String        @id @default(auto()) @map("_id") @db.ObjectId
   amount        Float
   createdAt     DateTime      @default(now())

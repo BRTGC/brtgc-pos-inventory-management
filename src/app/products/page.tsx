@@ -4,6 +4,7 @@ import withLayout from '@/components/withLayout';
 import { getSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import Loading from '@/components/Loading';  // Import your Loading component
 
 // Define a type for the Product
 type Product = {
@@ -35,15 +36,19 @@ const ProductsPage = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [sortOrder, setSortOrder] = useState<string>('name');
   const [session, setSession] = useState<Session>(null);
+  const [loading, setLoading] = useState<boolean>(true);  // Add loading state for fetching
+  const [fetchingProducts, setFetchingProducts] = useState<boolean>(true);  // Add loading state for products
 
   useEffect(() => {
     const fetchSession = async () => {
+      setLoading(true);  // Start loading session
       const sessionData = await getSession();
       setSession(sessionData as Session); // Use type assertion here
 
       if (!sessionData) {
         router.push("/auth/login"); // Redirect to sign in if not authenticated
       }
+      setLoading(false);  // Stop loading session
     };
 
     fetchSession();
@@ -52,6 +57,7 @@ const ProductsPage = () => {
   // Fetch products on mount
   useEffect(() => {
     const fetchProducts = async () => {
+      setFetchingProducts(true);  // Start loading products
       try {
         const res = await fetch('/api/products/get-all');
         if (!res.ok) throw new Error('Failed to fetch products');
@@ -62,6 +68,7 @@ const ProductsPage = () => {
         console.error(error);
         alert('Failed to load products');
       }
+      setFetchingProducts(false);  // Stop loading products
     };
     fetchProducts();
   }, []);
@@ -113,6 +120,11 @@ const ProductsPage = () => {
   const handleEdit = (id: number) => {
     router.push(`/products/edit/${id}`);
   };
+
+  // If loading session or products, display <Loading /> component
+  if (loading || fetchingProducts) {
+    return <Loading />;
+  }
 
   return (
     <div className="max-w-6xl mx-auto p-4">

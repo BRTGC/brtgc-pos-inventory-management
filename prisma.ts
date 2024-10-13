@@ -28,19 +28,22 @@ export const getProductById = async (id: string) => {
 };
 
 
-export const updateProduct = async (id: string, data: Partial<{
-    name: string;
-    description: string; // Include description
-    price: number;
-    costPrice: number; // Include costPrice
-    sku: string;
-    category: string; // Include category
-    stock: number;
-    lowStockAlert: number; // Include lowStockAlert
-}>) => {
+export const updateProduct = async (
+    id: string,
+    data: Partial<{
+        name: string;
+        description: string;  // Include description
+        price: number;
+        costPrice: number;    // Include costPrice
+        sku: string;
+        category: string;     // Include category
+        stock: number;
+        lowStockAlert: number; // Include lowStockAlert
+    }>
+) => {
     return await prisma.product.update({
         where: { id },
-        data,
+        data,  // Spread data dynamically into the update query
     });
 };
 

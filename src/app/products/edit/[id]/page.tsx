@@ -1,9 +1,10 @@
 "use client";
 
-import withLayout from '@/components/withLayout';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
+import Loading from '@/components/Loading'; // Import Loading component
+import withLayout from '@/components/withLayout';
 
 // Define the shape of your form data
 interface ProductFormData {
@@ -20,53 +21,71 @@ interface ProductFormData {
 // Define the shape of the params prop
 interface EditProductPageProps {
   params: {
-    id: string; // Assuming the id is a string, adjust if necessary
+    id: string;
   };
 }
 
-const EditProductPage = ({ params }: EditProductPageProps) => { // Use the interface here
+const EditProductPage = ({ params }: EditProductPageProps) => {
   const router = useRouter();
   const { id } = params;
 
-  // Initialize form methods
+  const [loading, setLoading] = useState(true); // Manage loading state
+
   const {
     register,
     handleSubmit,
     setValue,
     formState: { isSubmitting, isValid },
   } = useForm<ProductFormData>({
-    mode: 'onChange', // Validate on change
+    mode: 'onChange',
   });
 
-  // Fetch the product details when the component mounts
+  // Fetch product data
   useEffect(() => {
     const fetchProduct = async () => {
-      const res = await fetch(`/api/products/${id}`);
-      if (!res.ok) {
-        alert('Failed to load product');
-        return;
+      try {
+        const res = await fetch(`/api/products/${id}`);
+        if (!res.ok) {
+          throw new Error('Failed to load product');
+        }
+        const data = await res.json();
+
+        // Set form values
+        setValue('name', data.name);
+        setValue('description', data.description);
+        setValue('price', data.price);
+        setValue('costPrice', data.costPrice);
+        setValue('sku', data.sku);
+        setValue('category', data.category);
+        setValue('stock', data.stock);
+        setValue('lowStockAlert', data.lowStockAlert);
+
+      } catch (error) {
+        console.log(error)
+      } finally {
+        setLoading(false); // Stop loading after fetch completes
       }
-      const data = await res.json();
-      
-      // Set form values
-      setValue('name', data.name);
-      setValue('description', data.description);
-      setValue('price', data.price);
-      setValue('costPrice', data.costPrice);
-      setValue('sku', data.sku);
-      setValue('category', data.category);
-      setValue('stock', data.stock);
-      setValue('lowStockAlert', data.lowStockAlert);
     };
+
     fetchProduct();
   }, [id, setValue]);
 
+  // Update product on form submission
   const onSubmit = async (data: ProductFormData) => {
+    // Convert string inputs to numbers where necessary
+    const updatedData = {
+      ...data,
+      price: parseFloat(data.price.toString()), // Convert price to Float
+      costPrice: parseFloat(data.costPrice.toString()), // Convert costPrice to Float
+      stock: parseInt(data.stock.toString(), 10), // Convert stock to Integer
+      lowStockAlert: parseInt(data.lowStockAlert.toString(), 10), // Convert lowStockAlert to Integer
+    };
+
     // Make a PUT request to update the product
     const res = await fetch(`/api/products/update`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id, ...data }),
+      body: JSON.stringify({ id, ...updatedData }),
     });
 
     if (res.ok) {
@@ -76,6 +95,11 @@ const EditProductPage = ({ params }: EditProductPageProps) => { // Use the inter
       alert('Failed to update product');
     }
   };
+
+  // Show loading spinner until product data is fetched
+  if (loading) {
+    return <Loading />;
+  }
 
   return (
     <div className="max-w-6xl mx-auto p-4">

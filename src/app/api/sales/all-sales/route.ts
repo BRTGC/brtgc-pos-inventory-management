@@ -1,9 +1,9 @@
-// pages/api/sales/all-sales.ts
 import { NextResponse } from 'next/server';
-import prisma from '../../../../../prisma'; // Ensure this import is correct for your project structure
+import prisma from '../../../../../prisma'; // Ensure this import path matches your project structure
 
 export async function GET() {
     try {
+        // Fetch all sales along with their associated saleProducts and product details
         const sales = await prisma.sale.findMany({
             include: {
                 saleProducts: {

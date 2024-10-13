@@ -11,7 +11,7 @@ interface FormData {
   password: string; // Password of the user
   name: string; // Name of the user
   username: string; // Username of the user
-  role: string; // Role of the user, defaulting to "USER"
+  role: string; // Role of the user, selected from the form
 }
 
 const SignUp = () => {
@@ -19,10 +19,9 @@ const SignUp = () => {
   const router = useRouter(); // Use Next.js router for navigation
 
   const onSubmit: SubmitHandler<FormData> = async (data) => {
-    // Automatically set role to "USER" on the client side
+    // Use the selected role from the form
     const result = await signIn("credentials", {
       ...data,
-      role: "USER", // Set role here
       redirect: false,
     });
 
@@ -82,6 +81,19 @@ const SignUp = () => {
             className={`w-full p-2 border rounded ${errors.password ? 'border-red-500' : 'border-gray-300'}`}
           />
           {errors.password && <span className="text-red-500">{errors.password.message}</span>}
+        </div>
+
+        {/* Role Selection */}
+        <div className="mb-4">
+          <select
+            {...register("role", { required: "Role is required" })}
+            className={`w-full p-2 border rounded ${errors.role ? 'border-red-500' : 'border-gray-300'}`}
+          >
+            <option value="">Select Role</option>
+            <option value="USER">USER</option>
+            <option value="ADMIN">ADMIN</option>
+          </select>
+          {errors.role && <span className="text-red-500">{errors.role.message}</span>}
         </div>
 
         <button

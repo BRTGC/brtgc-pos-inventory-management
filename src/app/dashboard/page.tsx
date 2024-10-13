@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import withLayout from "@/components/withLayout";
 import { User } from "@/types/User"; // Import the User type
+import Loading from "@/components/Loading";
 
 const Dashboard = () => {
   const [user, setUser] = useState<User | null>(null); // Use the User type
@@ -31,7 +32,7 @@ const Dashboard = () => {
   }, [router]);
 
   if (!user) {
-    return <p>Loading...</p>; // Show loading state
+    return <Loading />; // Show loading state
   }
 
   return (

@@ -39,10 +39,15 @@ const Home = () => {
         <p className="text-gray-600 text-center mb-4 text-sm md:text-base">
           Log in to access your inventory management tools and get started!
         </p>
-        <div className="flex justify-center mb-6">
+        <div className="flex justify-evenly items-center mb-6">
           <Link href="/auth/login">
             <button className="bg-blue-500 text-white px-4 py-2 md:px-6 md:py-3 rounded-lg hover:bg-blue-600 transition duration-200">
               Login
+            </button>
+          </Link>
+          <Link href="/auth/signup">
+            <button className="bg-blue-500 text-white px-4 py-2 md:px-6 md:py-3 rounded-lg hover:bg-blue-600 transition duration-200">
+              Signup
             </button>
           </Link>
         </div>

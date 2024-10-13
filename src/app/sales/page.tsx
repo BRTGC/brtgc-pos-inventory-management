@@ -2,13 +2,7 @@
 
 import withLayout from '@/components/withLayout';
 import React, { useEffect, useState } from 'react';
-
-interface Sale {
-    id: string;
-    createdAt: string; // or Date
-    paymentMethod: string;
-    saleProducts: SaleProduct[];
-}
+import useCheckSessionData from '@/libs/useCheckSessionData';
 
 interface SaleProduct {
     id: string;
@@ -20,43 +14,62 @@ interface SaleProduct {
     quantity: number;
 }
 
+interface Sale {
+    id: string;
+    createdAt: string; // or Date
+    paymentMethod: string;
+    saleProducts: SaleProduct[];
+}
+
 const Page = () => {
     const [sales, setSales] = useState<Sale[]>([]);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
 
+    // Check if the session is still loading
+    const sessionLoading = useCheckSessionData();
+
     useEffect(() => {
+        // Only fetch sales if session check is complete
         const fetchSales = async () => {
             try {
                 const response = await fetch('/api/sales/all-sales');
-                console.log('Response status:', response.status); // Check the response status
+
+                // Check if response is OK, otherwise throw an error
                 if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+                    throw new Error(`HTTP error! Status: ${response.status}`);
                 }
-                const data = await response.json();
-                console.log(data)
+
+                const data: Sale[] = await response.json();
                 setSales(data);
             } catch (err) {
-                console.error('Fetch error:', err); // Log the error for debugging
-                setError(err.message);
+                // Ensure err is treated as an instance of Error
+                if (err instanceof Error) {
+                    console.error('Fetch error:', err.message); // Log the error for debugging
+                    setError(err.message || 'Unknown error occurred');
+                } else {
+                    setError('An unexpected error occurred');
+                }
             } finally {
                 setLoading(false);
             }
         };
 
-        fetchSales();
-    }, []);
+        if (!sessionLoading) {
+            fetchSales();
+        }
+    }, [sessionLoading]);
 
-    if (loading) {
-        return <div>Loading...</div>;
+    if (loading || sessionLoading) {
+        return <div>Loading...</div>; // Simple loading indicator
     }
 
     if (error) {
-        return <div>Error: {error}</div>;
+        return <div>Error: {error}</div>; // Display error if something went wrong
     }
 
     if (sales.length === 0) {
-        return <div>No sales data available.</div>;
+        return <div>No sales data available.</div>; // Show if there are no sales
     }
 
     return (
@@ -75,15 +88,19 @@ const Page = () => {
                     {sales.map((sale) => (
                         <tr key={sale.id}>
                             <td className="border px-4 py-2">{sale.id}</td>
-                            <td className="border px-4 py-2">{new Date(sale.createdAt).toLocaleString()}</td>
+                            <td className="border px-4 py-2">
+                                {new Date(sale.createdAt).toLocaleString()}
+                            </td>
                             <td className="border px-4 py-2">{sale.paymentMethod}</td>
                             <td className="border px-4 py-2">
-                                {sale.saleProducts.map((saleProduct) => (
-                                    <li key={saleProduct.id}>
-                                        <strong>Product Name:</strong> {saleProduct.product.name} <br />
-                                        <strong>Quantity:</strong> {saleProduct.quantity}
-                                    </li>
-                                ))}
+                                <ul className="list-disc list-inside">
+                                    {sale.saleProducts.map((saleProduct) => (
+                                        <li key={saleProduct.id}>
+                                            <strong>Product Name:</strong> {saleProduct.product.name} <br />
+                                            <strong>Quantity:</strong> {saleProduct.quantity}
+                                        </li>
+                                    ))}
+                                </ul>
                             </td>
                         </tr>
                     ))}
