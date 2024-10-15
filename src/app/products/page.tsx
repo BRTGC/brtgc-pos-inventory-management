@@ -1,4 +1,5 @@
-"use client";
+// /app/products/page.tsx
+"use client"
 
 import withLayout from '@/components/withLayout';
 import { getSession } from 'next-auth/react';
@@ -20,7 +21,6 @@ type Product = {
 // Define a type for the SessionUser
 type SessionUser = {
   role: string; // Changed to allow any string for roles
-  // Add other properties as needed
 };
 
 // Define a type for the Session
@@ -37,9 +37,20 @@ const ProductsPage = () => {
   const [sortOrder, setSortOrder] = useState<string>('name');
   const [session, setSession] = useState<Session>(null);
   const [loading, setLoading] = useState<boolean>(true);  // Add loading state for fetching
-  const [fetchingProducts, setFetchingProducts] = useState<boolean>(true);  // Add loading state for products
 
+  // Fetch products and session data when the component mounts
   useEffect(() => {
+    const fetchProducts = async () => {
+      setLoading(true);  // Start loading
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/products/get-all`, {
+        cache: 'no-cache', // Optional: Ensure fresh data
+      });
+      const initialProducts: Product[] = await res.json();
+      setProducts(initialProducts);
+      setFilteredProducts(initialProducts); // Initialize filtered products
+      setLoading(false); // Stop loading
+    };
+
     const fetchSession = async () => {
       setLoading(true);  // Start loading session
       const sessionData = await getSession();
@@ -51,27 +62,9 @@ const ProductsPage = () => {
       setLoading(false);  // Stop loading session
     };
 
+    fetchProducts();
     fetchSession();
   }, [router]);
-
-  // Fetch products on mount
-  useEffect(() => {
-    const fetchProducts = async () => {
-      setFetchingProducts(true);  // Start loading products
-      try {
-        const res = await fetch('/api/products/get-all');
-        if (!res.ok) throw new Error('Failed to fetch products');
-        const data = await res.json();
-        setProducts(data);
-        setFilteredProducts(data);
-      } catch (error) {
-        console.error(error);
-        alert('Failed to load products');
-      }
-      setFetchingProducts(false);  // Stop loading products
-    };
-    fetchProducts();
-  }, []);
 
   useEffect(() => {
     const applyFilters = () => {
@@ -122,7 +115,7 @@ const ProductsPage = () => {
   };
 
   // If loading session or products, display <Loading /> component
-  if (loading || fetchingProducts) {
+  if (loading) {
     return <Loading />;
   }
 
@@ -230,4 +223,5 @@ const ProductsPage = () => {
   );
 };
 
+// Export component wrapped with layout
 export default withLayout(ProductsPage);

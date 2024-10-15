@@ -31,97 +31,64 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({ isOpen, onClo
       const data = await response.json();
 
       if (data.status === 'success') {
-        setIsVerified(true); // Mark admin password as verified
+        setIsVerified(true); // Admin password verified
+        onChangePassword(newPassword); // Proceed to change password
+        onClose(); // Close the modal
       } else {
-        setError('Incorrect admin password');
+        setError(data.message); // Show error message
       }
-    } catch (err) {
-      setError('An error occurred during password verification.');
+    } catch (error) {
+      setError('Failed to verify password. Please try again.');
+    } finally {
+      setIsVerifying(false);
     }
-
-    setIsVerifying(false);
   };
 
-  const handlePasswordChange = (e: React.FormEvent) => {
-    e.preventDefault();
-    onChangePassword(newPassword);
-    onClose();
-  };
-
-  if (!isOpen) return null;
+  if (!isOpen) return null; // Return null if the modal is not open
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="bg-white rounded-lg shadow-lg p-6 w-96">
-        <h2 className="text-xl font-semibold mb-4">Change User Password</h2>
-        {error && <p className="text-red-600">{error}</p>}
-
-        {/* Admin password verification form */}
-        {!isVerified && (
-          <form onSubmit={handleSubmit}>
-            <div className="mb-4">
-              <label htmlFor="adminPassword" className="block mb-1">Admin Password</label>
+    <div className="fixed inset-0 flex items-center justify-center z-50">
+      <div className="absolute inset-0 bg-black opacity-50" onClick={onClose} />
+      <div className="bg-white rounded-lg p-6 shadow-lg z-10 w-11/12 max-w-md">
+        <h2 className="text-lg font-bold mb-4">Change User Password</h2>
+        <form onSubmit={handleSubmit}>
+          {!isVerified && (
+            <div>
+              <label className="block mb-1" htmlFor="admin-password">Admin Password</label>
               <input
+                id="admin-password"
                 type="password"
-                id="adminPassword"
                 value={adminPassword}
                 onChange={(e) => setAdminPassword(e.target.value)}
-                className="border rounded w-full py-2 px-3"
-                required
-                disabled={isVerifying} // Disable input during verification
-              />
-            </div>
-            <div className="flex justify-between">
-              <button
-                type="button"
-                onClick={onClose}
-                className="bg-gray-400 text-white py-1 px-4 rounded"
-                disabled={isVerifying} // Disable button during verification
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                className="bg-blue-600 text-white py-1 px-4 rounded"
-                disabled={isVerifying} // Disable button during verification
-              >
-                {isVerifying ? 'Verifying...' : 'Verify Admin Password'}
-              </button>
-            </div>
-          </form>
-        )}
-
-        {/* New password field, visible only after admin password is verified */}
-        {isVerified && (
-          <form onSubmit={handlePasswordChange}>
-            <div className="mb-4">
-              <label htmlFor="newPassword" className="block mb-1">New Password</label>
-              <input
-                type="password"
-                id="newPassword"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                className="border rounded w-full py-2 px-3"
+                className="border border-gray-300 p-2 w-full rounded mb-4"
+                placeholder="Enter admin password"
+                title="Enter your admin password"
                 required
               />
             </div>
-            <div className="flex justify-between">
-              <button
-                type="button"
-                onClick={onClose}
-                className="bg-gray-400 text-white py-1 px-4 rounded"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                className="bg-blue-600 text-white py-1 px-4 rounded"
-              >
-                Change Password
-              </button>
-            </div>
-          </form>
-        )}
+          )}
+          <div>
+            <label className="block mb-1" htmlFor="new-password">New Password</label>
+            <input
+              id="new-password"
+              type="password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              className="border border-gray-300 p-2 w-full rounded mb-4"
+              placeholder="Enter new password"
+              title="Enter your new password"
+              required
+            />
+          </div>
+          {error && <p className="text-red-600 mb-4">{error}</p>}
+          <button
+            type="submit"
+            className={`bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 ${isVerifying ? 'opacity-50 cursor-not-allowed' : ''}`}
+            disabled={isVerifying}
+          >
+            {isVerifying ? 'Verifying...' : 'Change Password'}
+          </button>
+        </form>
       </div>
     </div>
   );

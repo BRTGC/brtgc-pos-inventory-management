@@ -50,6 +50,7 @@ model SaleProduct {
 model Sale {
   id            String        @id @default(auto()) @map("_id") @db.ObjectId
   amount        Float
+  paymentMethod String?
   createdAt     DateTime      @default(now())
   saleProducts  SaleProduct[]  // Relationship with SaleProduct
 }

@@ -45,11 +45,13 @@ export async function GET(request: Request) {
 
         // If no users found, return an empty array
         if (publicUsers.length === 0) {
-            return NextResponse.json<ApiResponse<PublicUser[]>>({
+            const response = NextResponse.json<ApiResponse<PublicUser[]>>({
                 status: 'success',
                 data: [],
                 message: 'No users found',
             });
+            response.headers.set('Cache-Control', 'no-store'); // Prevent caching
+            return response;
         }
 
         // Get the total count of users for pagination
@@ -59,11 +61,16 @@ export async function GET(request: Request) {
 
         const totalPages = Math.ceil(totalUsers / limit);
 
-        // Return the list of public users along with pagination info
-        return NextResponse.json<ApiResponse<{ users: PublicUser[]; totalPages: number }>>({
+        // Set cache headers for caching the response
+        const response = NextResponse.json<ApiResponse<{ users: PublicUser[]; totalPages: number }>>({
             status: 'success',
             data: { users: publicUsers, totalPages },
         });
+
+        // Cache response for 10 minutes
+        response.headers.set('Cache-Control', 'public, max-age=600, stale-while-revalidate=60');
+
+        return response;
 
     } catch (error) {
         // Handle any errors and return a failure response

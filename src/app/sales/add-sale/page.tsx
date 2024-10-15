@@ -104,47 +104,43 @@ const NewSalePage: React.FC = () => {
         e.preventDefault();
 
         if (selectedProducts.length === 0) {
-            setMessage('Please add at least one product to complete the sale.');
+            setMessage('Please select at least one product.');
             return;
         }
 
-        if (!paymentMethod) {
-            setMessage('Please select a payment method.');
-            return;
-        }
+        const totalAmount = selectedProducts.reduce((acc, sp) => acc + sp.product.price * sp.quantity, 0);
 
-        const totalAmount = selectedProducts.reduce(
-            (acc, sp) => acc + sp.product.price * sp.quantity,
-            0
-        );
+        const saleData = {
+            amount: totalAmount,
+            saleProducts: selectedProducts.map((sp) => ({
+                productId: sp.product.id,
+                quantity: sp.quantity,
+            })),
+            paymentMethod,
+        };
 
-        console.log(selectedProducts, paymentMethod, totalAmount.toFixed(2));
-
-        // Send the selected products and payment method to the server
         try {
             const res = await fetch('/api/sales/add-sales', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({
-                    selectedProducts,
-                    paymentMethod,
-                    totalAmount: totalAmount.toFixed(2),
-                }),
+                body: JSON.stringify(saleData),
             });
 
-            if (!res.ok) {
-                const errorResponse = await res.json();
-                throw new Error(errorResponse.message || 'Failed to complete the sale');
-            }
+            const data = await res.json();
 
-            setMessage('Sale completed successfully.');
-            setSelectedProducts([]); // Clear products after submission
-            localStorage.removeItem('selectedProducts'); // Clear localStorage
+            if (!res.ok) {
+                setMessage(data.error || 'Failed to complete the sale.');
+            } else {
+                // Reset the form and show success message
+                setSelectedProducts([]);
+                setPaymentMethod('cash');
+                setMessage('Sale completed successfully!');
+            }
         } catch (error) {
-            setMessage('Failed to complete the sale. Please try again.');
             console.error(error);
+            setMessage('Error completing the sale. Please try again.');
         }
     };
 
@@ -260,7 +256,7 @@ const NewSalePage: React.FC = () => {
                 {/* Submit Button */}
                 <button
                     type="submit"
-                    className="w-full bg-blue-600 text-white rounded-md p-2 hover:bg-blue-700 transition-colors"
+                    className="mt-4 w-full bg-blue-600 text-white rounded-md p-2 hover:bg-blue-700 transition-colors"
                 >
                     Complete Sale
                 </button>
