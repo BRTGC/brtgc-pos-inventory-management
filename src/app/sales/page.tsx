@@ -3,6 +3,7 @@
 import withLayout from '@/components/withLayout';
 import React, { useEffect, useState } from 'react';
 import useCheckSessionData from '@/libs/useCheckSessionData';
+import Loading from '@/components/Loading';
 
 interface SaleProduct {
     id: string;
@@ -70,59 +71,71 @@ const Page = () => {
     }, [sessionLoading]);
 
     if (loading || sessionLoading) {
-        return <div>Loading...</div>; // Simple loading indicator
+        return <Loading />; // Use your custom Loading component
     }
 
     if (error) {
-        return <div>Error: {error}</div>; // Display error if something went wrong
+        return <div className="text-center text-red-600">Error: {error}</div>; // Display error if something went wrong
     }
 
     if (sales.length === 0) {
-        return <div>No sales data available.</div>; // Show if there are no sales
+        return <div className="text-center">No sales data available.</div>; // Show if there are no sales
     }
 
     return (
         <div className="container mx-auto p-4">
-            <h1 className="text-2xl font-bold mb-4">Sales List</h1>
-            <table className="min-w-full border border-gray-300">
-                <thead>
-                    <tr className="bg-gray-200">
-                        <th className="border px-4 py-2">Sale ID</th>
-                        <th className="border px-4 py-2">Timestamp</th>
-                        <th className="border px-4 py-2">Payment Method</th>
-                        <th className="border px-4 py-2">Products Ordered</th>
-                        <th className="border px-4 py-2">Total Amount Paid</th> {/* New column */}
-                    </tr>
-                </thead>
-                <tbody>
-                    {sales.map((sale) => {
-                        const totalAmountPaid = sale.saleProducts.reduce(
-                            (total, saleProduct) => total + saleProduct.product.price * saleProduct.quantity,
-                            0
-                        );
-                        return (
-                            <tr key={sale.id}>
-                                <td className="border px-4 py-2">{sale.id}</td>
-                                <td className="border px-4 py-2">
-                                    {new Date(sale.createdAt).toLocaleString()}
-                                </td>
-                                <td className="border px-4 py-2">{sale.paymentMethod}</td>
-                                <td className="border px-4 py-2">
-                                    <ul className="list-disc list-inside">
-                                        {sale.saleProducts.map((saleProduct) => (
-                                            <li key={saleProduct.id}>
-                                                <strong>Product Name:</strong> {saleProduct.product.name} <br />
-                                                <strong>Quantity:</strong> {saleProduct.quantity}
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </td>
-                                <td className="border px-4 py-2">${totalAmountPaid.toFixed(2)}</td> {/* Display total */}
-                            </tr>
-                        );
-                    })}
-                </tbody>
-            </table>
+            <div className="flex flex-col md:flex-row md:justify-between items-center mb-4">
+                <h1 className="text-2xl font-bold mb-2 md:mb-0 text-center md:text-left">Sales List</h1>
+                <div>
+                    <a
+                        href="/sales/add-sale"
+                        className="bg-blue-500 hover:bg-blue-600 sm:px-6 px-4 sm:py-3 py-2 text-white text-base sm:text-lg font-semibold rounded-md transition duration-200"
+                    >
+                        Add Sale
+                    </a>
+                </div>
+            </div>
+            <div className="overflow-x-auto">
+                <table className="min-w-full border border-gray-300 bg-white shadow-md rounded-lg">
+                    <thead className="bg-gray-200">
+                        <tr>
+                            <th className="border px-4 py-2">Sale ID</th>
+                            <th className="border px-4 py-2">Timestamp</th>
+                            <th className="border px-4 py-2">Payment Method</th>
+                            <th className="border px-4 py-2">Products Ordered</th>
+                            <th className="border px-4 py-2">Total Amount Paid</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {sales.map((sale) => {
+                            const totalAmountPaid = sale.saleProducts.reduce(
+                                (total, saleProduct) => total + saleProduct.product.price * saleProduct.quantity,
+                                0
+                            );
+                            return (
+                                <tr key={sale.id} className="hover:bg-gray-100">
+                                    <td className="border px-4 py-2">{sale.id}</td>
+                                    <td className="border px-4 py-2">
+                                        {new Date(sale.createdAt).toLocaleString()}
+                                    </td>
+                                    <td className="border px-4 py-2">{sale.paymentMethod || 'N/A'}</td>
+                                    <td className="border px-4 py-2">
+                                        <ul className="list-disc list-inside">
+                                            {sale.saleProducts.map((saleProduct) => (
+                                                <li key={saleProduct.id}>
+                                                    <strong>Product Name:</strong> {saleProduct.product.name} <br />
+                                                    <strong>Quantity:</strong> {saleProduct.quantity}
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </td>
+                                    <td className="border px-4 py-2">${totalAmountPaid.toFixed(2)}</td>
+                                </tr>
+                            );
+                        })}
+                    </tbody>
+                </table>
+            </div>
         </div>
     );
 };

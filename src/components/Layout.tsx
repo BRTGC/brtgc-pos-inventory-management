@@ -17,7 +17,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             </div>
 
             {/* Main Content */}
-            <div className="bg-gray-100 text-black sm:pt-20 pt-0 p-4">
+            <div className="bg-gray-100 text-black lg:pt-16 pt-0 p-4">
                 {children}
             </div>
         </div>
