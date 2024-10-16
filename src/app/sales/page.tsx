@@ -17,7 +17,7 @@ interface SaleProduct {
 interface Sale {
     id: string;
     createdAt: string; // or Date
-    paymentMethod: string;
+    paymentMethod: string | null; // Allow null value
     saleProducts: SaleProduct[];
 }
 
@@ -33,6 +33,12 @@ const Page = () => {
         // Only fetch sales if session check is complete
         const fetchSales = async () => {
             try {
+                // First, check for cached data
+                const cachedSales = localStorage.getItem('salesData');
+                if (cachedSales) {
+                    setSales(JSON.parse(cachedSales)); // Set cached sales if available
+                }
+
                 const response = await fetch('/api/sales/all-sales');
 
                 // Check if response is OK, otherwise throw an error
@@ -42,6 +48,9 @@ const Page = () => {
 
                 const data: Sale[] = await response.json();
                 setSales(data);
+
+                // Cache the fetched sales data in local storage
+                localStorage.setItem('salesData', JSON.stringify(data));
             } catch (err) {
                 // Ensure err is treated as an instance of Error
                 if (err instanceof Error) {
@@ -82,28 +91,36 @@ const Page = () => {
                         <th className="border px-4 py-2">Timestamp</th>
                         <th className="border px-4 py-2">Payment Method</th>
                         <th className="border px-4 py-2">Products Ordered</th>
+                        <th className="border px-4 py-2">Total Amount Paid</th> {/* New column */}
                     </tr>
                 </thead>
                 <tbody>
-                    {sales.map((sale) => (
-                        <tr key={sale.id}>
-                            <td className="border px-4 py-2">{sale.id}</td>
-                            <td className="border px-4 py-2">
-                                {new Date(sale.createdAt).toLocaleString()}
-                            </td>
-                            <td className="border px-4 py-2">{sale.paymentMethod}</td>
-                            <td className="border px-4 py-2">
-                                <ul className="list-disc list-inside">
-                                    {sale.saleProducts.map((saleProduct) => (
-                                        <li key={saleProduct.id}>
-                                            <strong>Product Name:</strong> {saleProduct.product.name} <br />
-                                            <strong>Quantity:</strong> {saleProduct.quantity}
-                                        </li>
-                                    ))}
-                                </ul>
-                            </td>
-                        </tr>
-                    ))}
+                    {sales.map((sale) => {
+                        const totalAmountPaid = sale.saleProducts.reduce(
+                            (total, saleProduct) => total + saleProduct.product.price * saleProduct.quantity,
+                            0
+                        );
+                        return (
+                            <tr key={sale.id}>
+                                <td className="border px-4 py-2">{sale.id}</td>
+                                <td className="border px-4 py-2">
+                                    {new Date(sale.createdAt).toLocaleString()}
+                                </td>
+                                <td className="border px-4 py-2">{sale.paymentMethod}</td>
+                                <td className="border px-4 py-2">
+                                    <ul className="list-disc list-inside">
+                                        {sale.saleProducts.map((saleProduct) => (
+                                            <li key={saleProduct.id}>
+                                                <strong>Product Name:</strong> {saleProduct.product.name} <br />
+                                                <strong>Quantity:</strong> {saleProduct.quantity}
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </td>
+                                <td className="border px-4 py-2">${totalAmountPaid.toFixed(2)}</td> {/* Display total */}
+                            </tr>
+                        );
+                    })}
                 </tbody>
             </table>
         </div>
