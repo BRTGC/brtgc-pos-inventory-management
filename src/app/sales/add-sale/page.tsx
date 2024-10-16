@@ -8,6 +8,7 @@ interface Product {
     name: string;
     price: number;
     sku: string;
+    stock: number;
 }
 
 interface SelectedProduct {
@@ -28,7 +29,6 @@ const NewSalePage: React.FC = () => {
     const [paymentMethod, setPaymentMethod] = useState<string>('cash');
     const [message, setMessage] = useState<string>('');
 
-    // Fetch products on mount
     useEffect(() => {
         const fetchProducts = async () => {
             try {
@@ -45,7 +45,6 @@ const NewSalePage: React.FC = () => {
         fetchProducts();
     }, []);
 
-    // Save selected products to local storage
     useEffect(() => {
         localStorage.setItem('selectedProducts', JSON.stringify(selectedProducts));
     }, [selectedProducts]);
@@ -53,7 +52,6 @@ const NewSalePage: React.FC = () => {
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
         setSearchTerm(value);
-
         const filtered = products.filter((product) =>
             product.name.toLowerCase().includes(value.toLowerCase())
         );
@@ -65,12 +63,17 @@ const NewSalePage: React.FC = () => {
         setQuantity(1);
         setSearchTerm('');
         setFilteredProducts([]);
-        setMessage(''); // Clear message when selecting a product
+        setMessage('');
     };
 
     const handleAddProduct = () => {
         if (!selectedProduct || quantity <= 0) {
             setMessage('Please select a product and enter a valid quantity.');
+            return;
+        }
+
+        if (quantity > selectedProduct.stock) {
+            setMessage(`Cannot add more than ${selectedProduct.stock} items of ${selectedProduct.name}.`);
             return;
         }
 
@@ -133,7 +136,6 @@ const NewSalePage: React.FC = () => {
             if (!res.ok) {
                 setMessage(data.error || 'Failed to complete the sale.');
             } else {
-                // Reset the form and show success message
                 setSelectedProducts([]);
                 setPaymentMethod('cash');
                 setMessage('Sale completed successfully!');
@@ -144,13 +146,21 @@ const NewSalePage: React.FC = () => {
         }
     };
 
+    const handleNewSale = () => {
+        setSelectedProducts([]);
+        setSelectedProduct(null);
+        setMessage('');
+    };
+
     return (
-        <div className="container mx-auto p-4 max-w-4xl">
-            <h1 className="text-3xl font-bold mb-6 text-center text-gray-800">Create New Sale</h1>
-            <form onSubmit={handleSubmit} className="space-y-6 bg-white shadow-md rounded-lg p-6">
+        <div className="container mx-auto p-4 max-w-3xl">
+            <h1 className="text-4xl font-semibold text-center text-gray-800 mb-10">Create New Sale</h1>
+            <form onSubmit={handleSubmit} className="space-y-8 bg-white shadow-lg rounded-lg p-8">
+                {message && <p className="text-center text-red-500 font-medium">{message}</p>}
+
                 {/* Search Product */}
                 <div className="relative">
-                    <label htmlFor="productSearch" className="block text-sm font-medium text-gray-700">
+                    <label htmlFor="productSearch" className="block text-sm font-medium text-gray-700 mb-2">
                         Search Product
                     </label>
                     <input
@@ -158,15 +168,15 @@ const NewSalePage: React.FC = () => {
                         id="productSearch"
                         value={searchTerm}
                         onChange={handleSearchChange}
-                        className="mt-1 block w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500"
-                        placeholder="Type to search..."
+                        className="block w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-indigo-500 focus:border-indigo-500"
+                        placeholder="Type to search product..."
                     />
                     {searchTerm && filteredProducts.length > 0 && (
-                        <ul className="border border-gray-300 rounded-md mt-2 absolute z-10 bg-white w-full shadow-lg max-h-60 overflow-auto">
+                        <ul className="absolute z-20 bg-white border border-gray-200 rounded-lg mt-2 shadow-lg w-full max-h-60 overflow-y-auto">
                             {filteredProducts.map((product) => (
                                 <li
                                     key={product.id}
-                                    className="p-2 hover:bg-gray-100 cursor-pointer"
+                                    className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
                                     onClick={() => handleProductSelect(product)}
                                 >
                                     {product.name} - (SKU: {product.sku})
@@ -178,13 +188,15 @@ const NewSalePage: React.FC = () => {
 
                 {/* Selected Product */}
                 {selectedProduct && (
-                    <div className="mt-4 p-4 border border-gray-300 rounded-md bg-gray-50">
-                        <h3 className="font-semibold text-lg text-gray-800">Selected Product:</h3>
-                        <p className="mt-2 text-gray-700">Name: {selectedProduct.name}</p>
-                        <p className="text-gray-700">Price: &#8358;{selectedProduct.price.toFixed(2)}</p>
-                        <p className="text-gray-700">SKU: {selectedProduct.sku}</p>
+                    <div className="p-4 border border-gray-200 rounded-lg bg-gray-50">
+                        <h3 className="font-medium text-lg mb-4">Selected Product</h3>
+                        <p className="text-gray-600">Name: {selectedProduct.name}</p>
+                        <p className="text-gray-600">Price: &#8358;{selectedProduct.price.toFixed(2)}</p>
+                        <p className="text-gray-600">SKU: {selectedProduct.sku}</p>
+                        <p className="text-gray-600">Stock: {selectedProduct.stock}</p>
+
                         <div className="mt-4">
-                            <label htmlFor="quantity" className="block text-sm font-medium text-gray-700">
+                            <label htmlFor="quantity" className="block text-sm font-medium text-gray-700 mb-2">
                                 Quantity
                             </label>
                             <input
@@ -192,16 +204,16 @@ const NewSalePage: React.FC = () => {
                                 id="quantity"
                                 value={quantity}
                                 onChange={(e) => setQuantity(Math.max(1, Number(e.target.value)))}
-                                className="mt-1 block w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500"
+                                className="block w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-indigo-500 focus:border-indigo-500"
                                 required
                                 min={1}
                             />
                             <button
                                 type="button"
                                 onClick={handleAddProduct}
-                                className="mt-3 w-full bg-green-600 text-white rounded-md p-2 hover:bg-green-700 transition-colors"
+                                className="mt-3 w-full bg-green-600 text-white rounded-lg px-4 py-2 hover:bg-green-700 transition-colors"
                             >
-                                Add Product
+                                Add to Cart
                             </button>
                         </div>
                     </div>
@@ -209,12 +221,12 @@ const NewSalePage: React.FC = () => {
 
                 {/* Selected Products List */}
                 {selectedProducts.length > 0 && (
-                    <div>
-                        <h3 className="text-lg font-semibold text-gray-800 mb-2">Selected Products:</h3>
-                        <ul className="space-y-2">
+                    <div className="p-4 border border-gray-200 rounded-lg bg-gray-50">
+                        <h3 className="font-medium text-lg mb-4">Selected Products</h3>
+                        <ul className="space-y-3">
                             {selectedProducts.map((sp, index) => (
-                                <li key={index} className="flex justify-between items-center p-2 border border-gray-300 rounded-md bg-gray-50">
-                                    <span>
+                                <li key={index} className="flex justify-between items-center">
+                                    <span className="text-gray-700">
                                         {sp.product.name} - {sp.quantity} pcs - &#8358;{(sp.product.price * sp.quantity).toFixed(2)}
                                     </span>
                                     <button
@@ -226,40 +238,44 @@ const NewSalePage: React.FC = () => {
                                 </li>
                             ))}
                         </ul>
-                        <div className="mt-4 font-bold text-lg">
-                            Total Amount: &#8358;{selectedProducts.reduce(
-                                (acc, sp) => acc + sp.product.price * sp.quantity,
-                                0
-                            ).toFixed(2)}
+                        <div className="mt-4 text-lg font-semibold text-gray-800">
+                            Total: &#8358;{selectedProducts.reduce((acc, sp) => acc + sp.product.price * sp.quantity, 0).toFixed(2)}
                         </div>
                     </div>
                 )}
 
-                {/* Payment Method Selection */}
-                <div className="mt-4">
-                    <label className="block text-sm font-medium text-gray-700">Payment Method</label>
+                {/* Payment Method */}
+                <div>
+                    <label htmlFor="paymentMethod" className="block text-sm font-medium text-gray-700 mb-2">
+                        Payment Method
+                    </label>
                     <select
+                        id="paymentMethod"
                         value={paymentMethod}
                         onChange={(e) => setPaymentMethod(e.target.value)}
-                        className="mt-1 block w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500"
+                        className="block w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-indigo-500 focus:border-indigo-500"
                     >
                         <option value="cash">Cash</option>
                         <option value="card">Card</option>
+                        <option value="transfer">Transfer</option>
                     </select>
                 </div>
 
-                {/* Message */}
-                {message && (
-                    <div className="mt-4 p-2 text-red-700 bg-red-100 rounded-md">{message}</div>
-                )}
-
-                {/* Submit Button */}
-                <button
-                    type="submit"
-                    className="mt-4 w-full bg-blue-600 text-white rounded-md p-2 hover:bg-blue-700 transition-colors"
-                >
-                    Complete Sale
-                </button>
+                <div className="flex justify-between items-center">
+                    <button
+                        type="submit"
+                        className="bg-blue-600 text-white rounded-lg px-4 py-2 hover:bg-blue-700 transition-colors"
+                    >
+                        Complete Sale
+                    </button>
+                    <button
+                        type="button"
+                        onClick={handleNewSale}
+                        className="bg-gray-500 text-white rounded-lg px-4 py-2 hover:bg-gray-600 transition-colors"
+                    >
+                        New Sale
+                    </button>
+                </div>
             </form>
         </div>
     );
