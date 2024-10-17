@@ -1,4 +1,3 @@
-// src/app/dashboard/page.tsx
 "use client";
 
 import { getSession, signOut } from "next-auth/react";
@@ -7,16 +6,46 @@ import { useRouter } from "next/navigation";
 import withLayout from "@/components/withLayout";
 import { User } from "@/types/User"; // Import the User type
 import Loading from "@/components/Loading";
-import { FaBox, FaChartLine, FaDollarSign, FaShoppingCart, FaUser } from "react-icons/fa";
+import { FaBox, FaShoppingCart, FaUser } from "react-icons/fa";
+import { FaNairaSign } from "react-icons/fa6";
 import DashboardCard from "@/components/DashboardCard";
 
+type Product = {
+  id: number;
+  name: string;
+  price: number;
+  sku: string;
+  stock: number;
+  category: string;
+  lowStockAlert: number;
+};
+
+interface Sale {
+  id: string;
+  createdAt: string;
+  paymentMethod: string | null;
+  amount: number;
+  saleProducts: SaleProduct[];
+}
+
+type SaleProduct = {
+  product: {
+    id: number;
+    name: string;
+    price: number;
+    sku: string;
+    stock: number;
+    category: string;
+  };
+  quantity: number; // Quantity of the product sold in the sale
+};
+
 const Dashboard = () => {
-  const [user, setUser] = useState<User | null>(null); // Use the User type
+  const [user, setUser] = useState<User | null>(null);
   const [userCount, setUserCount] = useState<number>(0);
   const [productCount, setProductCount] = useState<number>(0);
-  const [salesAmount, setSalesAmount] = useState<string>("$0");
-  const [lowStockCount, setLowStockCount] = useState<number>(5); // Hardcoded for now
-  const [isDarkTheme, setIsDarkTheme] = useState<boolean>(false);
+  const [salesAmount, setSalesAmount] = useState<string>("₦0");
+  const [lowStockCount, setLowStockCount] = useState<number>(0);
   const router = useRouter();
 
   useEffect(() => {
@@ -27,51 +56,76 @@ const Dashboard = () => {
       } else {
         const userFromSession: User = {
           id: session.user.id,
-          username: session.user.username || "", // Provide a default if username is missing
-          role: session.user.role,
+          username: session.user.username || "", // Provide default if missing
+          role: session.user.role || "guest", // Provide default role if missing
         };
 
         setUser(userFromSession); // Set user data from session
-
-        // Fetch dynamic data
-        fetchDashboardData(); // Fetch the dashboard data after user is set
       }
     };
 
     fetchSession();
   }, [router]);
 
-  const fetchDashboardData = async () => {
-    try {
-      // Fetch the counts from your API or database
-      const response = await fetch('/api/dashboard'); // Adjust the endpoint as necessary
-      const data = await response.json();
+  useEffect(() => {
+    // Fetch data concurrently
+    const fetchData = async () => {
+      try {
+        const [productRes, salesRes, userRes] = await Promise.all([
+          fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/products/get-all`),
+          fetch('/api/sales/all-sales'),
+          fetch('/api/users'),
+        ]);
 
-      // Set the fetched data
-      setUserCount(data.userCount);
-      setProductCount(data.productCount);
-      setSalesAmount(data.salesAmount);
-    } catch (error) {
-      console.error("Error fetching dashboard data:", error);
-    }
-  };
+        const products: Product[] = await productRes.json();
+        const sales: Sale[] = await salesRes.json();
+        const users = await userRes.json(); // Fetch users
+
+        // Set user count
+        const userCount = users.data.users.length
+        setUserCount(userCount);
+
+        // Set product count
+        setProductCount(products.length);
+
+        // Calculate total sales amount
+        const totalSalesAmount = sales.reduce((total, sale) => {
+          const saleTotal = sale.saleProducts.reduce((saleTotal, saleProduct) => {
+            return saleTotal + saleProduct.product.price * saleProduct.quantity;
+          }, 0);
+          return total + saleTotal;
+        }, 0);
+
+        // Format sales amount with commas and two decimal places
+        setSalesAmount(`₦${totalSalesAmount.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,')}`);
+
+        // Handle low stock count
+        const lowStockItems = products.filter((product) => product.stock <= product.lowStockAlert);
+        setLowStockCount(lowStockItems.length);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   if (!user) {
-    return <Loading />; // Show loading state
+    return <Loading />; // Show loading spinner while fetching session
   }
 
   return (
-    <div className={`p-5 ${isDarkTheme ? 'bg-gray-800 text-white' : 'bg-white text-black'}`}>
+    <div>
       <h1 className="text-2xl font-bold text-right mr-[5%]">
         Welcome, <span className="font-bold uppercase">{user.username}</span>
       </h1>
-      <div className="flex flex-wrap justify-center space-x-4 space-y-4">
+      <div className="flex flex-wrap justify-center space-x-4 space-y-4 mt-6">
         {/* Users Card */}
         <DashboardCard
           link="/users"
-          icon={<FaUser className="inline mr-2" size={20} />} // Adjust icon size if needed
+          icon={<FaUser className="inline mr-2" size={20} />}
           title="Users"
-          value={20} // Hardcoded value for now
+          value={userCount}
           bgColor="blue-400"
         />
 
@@ -80,16 +134,16 @@ const Dashboard = () => {
           link="/products"
           icon={<FaBox className="inline mr-2" size={20} />}
           title="Products"
-          value={productCount} // Dynamic value from state
+          value={productCount}
           bgColor="green-400"
         />
 
         {/* Sales Card */}
         <DashboardCard
           link="/sales"
-          icon={<FaDollarSign className="inline mr-2" size={20} />}
+          icon={<FaNairaSign  className="inline mr-2" size={20} />}
           title="Sales"
-          value={salesAmount} // Dynamic value from state
+          value={salesAmount}
           bgColor="red-400"
         />
 
@@ -98,23 +152,26 @@ const Dashboard = () => {
           link="/low-stocks"
           icon={<FaShoppingCart className="inline mr-2" size={20} />}
           title="Low Stocks"
-          value={lowStockCount} // Hardcoded value for now
-          bgColor="purple-400" // Cool color
+          value={lowStockCount}
+          bgColor="purple-400"
         />
       </div>
 
-      <button
-        onClick={() => router.push("/profile")} // Redirect to profile page
-        className="mt-4 bg-blue-500 text-white px-4 py-2 rounded"
-      >
-        Go to Profile
-      </button>
-      <button
-        onClick={() => signOut()} // Logout function
-        className="mt-4 ml-4 bg-red-500 text-white px-4 py-2 rounded"
-      >
-        Logout
-      </button>
+      {/* Profile and Logout Buttons */}
+      <div className="mt-6 flex justify-center">
+        <button
+          onClick={() => router.push("/profile")}
+          className="bg-blue-500 text-white px-4 py-2 rounded shadow"
+        >
+          Go to Profile
+        </button>
+        <button
+          onClick={() => signOut()}
+          className="ml-4 bg-red-500 text-white px-4 py-2 rounded shadow"
+        >
+          Logout
+        </button>
+      </div>
     </div>
   );
 };
