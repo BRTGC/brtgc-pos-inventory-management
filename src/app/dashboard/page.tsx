@@ -18,6 +18,7 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
+import ThemeToggle from "@/components/ThemeToggle";
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
@@ -256,6 +257,8 @@ const Dashboard = () => {
       <h1 className="text-2xl font-bold text-center mb-6">
         Welcome, <span className="font-bold uppercase">{user.username}</span>
       </h1>
+
+      <ThemeToggle />
 
       {/* Dashboard Cards Section */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">

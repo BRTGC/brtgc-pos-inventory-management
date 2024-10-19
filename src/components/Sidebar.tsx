@@ -5,7 +5,11 @@ import { MdDashboard } from 'react-icons/md';
 import { getSession, signOut } from 'next-auth/react';
 import Image from 'next/image';
 
-const Navbar = () => {
+interface MyComponentProps {
+  bgColor: string;
+}
+
+const Navbar: React.FC<MyComponentProps> = ({ bgColor  }) => {
   // const [inventoryDropdown, setInventoryDropdown] = useState(false);
   const [userRole, setUserRole] = useState<string | null>(null); // Allow string or null
 
@@ -21,7 +25,7 @@ const Navbar = () => {
   }, []);
 
   return (
-    <nav className="bg-gray-800 fixed text-white px-4 py-3 w-full">
+    <nav className={`${bgColor} fixed text-white px-4 py-3 w-full rounded-b-lg`}>
       <div className="container mx-auto flex items-center justify-around">
         {/* Logo */}
         <div className="flex items-center">
@@ -104,25 +108,11 @@ const Navbar = () => {
             <FaShoppingCart className="mr-2" size={24} />
             <span>Sales</span>
           </a>
-
-          {/* Reports */}
-          <a href="/reports/restocking" className="flex items-center hover:text-gray-300">
-            <FaFileAlt className="mr-2" size={24} />
-            <span>Restocking Report</span>
-          </a>
         </div>
         <div className='flex items-center gap-8'>
-          {/* Profile */}
-          <a href="/profile" className="flex items-center hover:text-gray-300">
-            <FiUser className="mr-2" size={24} />
-            <span>Profile</span>
-          </a>
 
-          {/* Settings */}
-          <a href="/settings" className="flex items-center hover:text-gray-300">
-            <FiSettings className="mr-2" size={24} />
-            <span>Settings</span>
-          </a>
+          {/* lightt and dark mode */}
+          
 
           {/* Logout */}
           <button

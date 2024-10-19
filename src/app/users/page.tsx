@@ -17,21 +17,17 @@ const UsersPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<string | null>(null);
 
-  // Check session data before fetching users
   const sessionLoading = useCheckSessionData();
-
-  // Cache expiration time in milliseconds (10 minutes)
-  const cacheExpiration = 1000 * 60 * 10;
+  const cacheExpiration = 1000 * 60 * 10; // Cache for 10 minutes
 
   // Fetch users data with caching and session check
   const fetchUsers = async (page: number) => {
-    if (sessionLoading) return; // Return early if session check is still loading
+    if (sessionLoading) return;
 
-    setLoading(true); // Set loading before API request
+    setLoading(true);
     const cacheKey = `users-page-${page}`;
-
-    // Check if users data for the current page is already cached
     const cachedData = localStorage.getItem(cacheKey);
+
     if (cachedData) {
       const { users, totalPages, timestamp } = JSON.parse(cachedData);
       if (Date.now() - timestamp < cacheExpiration) {
@@ -45,18 +41,13 @@ const UsersPage = () => {
     try {
       const response = await fetch(`/api/users?page=${page}`);
       const data = await response.json();
+
       if (data.status === "success") {
         setUsers(data.data.users);
         setTotalPages(data.data.totalPages);
-
-        // Cache the fetched data along with a timestamp
         localStorage.setItem(
           cacheKey,
-          JSON.stringify({
-            users: data.data.users,
-            totalPages: data.data.totalPages,
-            timestamp: Date.now(),
-          })
+          JSON.stringify({ users: data.data.users, totalPages: data.data.totalPages, timestamp: Date.now() })
         );
       } else {
         console.error(data.message);
@@ -64,7 +55,7 @@ const UsersPage = () => {
     } catch (error) {
       console.error("Failed to fetch users:", error);
     } finally {
-      setLoading(false); // Stop loading after API request
+      setLoading(false);
     }
   };
 
@@ -75,7 +66,6 @@ const UsersPage = () => {
     }
   }, [currentPage, sessionLoading]);
 
-  // Fetch the session data to get user role
   useEffect(() => {
     const fetchSession = async () => {
       const session = await getSession();
@@ -84,7 +74,7 @@ const UsersPage = () => {
     fetchSession();
   }, []);
 
-  // Handle pagination (next and previous page)
+  // Pagination handlers
   const handleNextPage = () => {
     if (currentPage < totalPages) setCurrentPage(currentPage + 1);
   };
@@ -93,21 +83,21 @@ const UsersPage = () => {
     if (currentPage > 1) setCurrentPage(currentPage - 1);
   };
 
-  // Handle user deletion
+  // Deletion
   const handleDeleteUser = async (userId: string) => {
     if (!confirm("Are you sure you want to delete this user?")) return;
 
     const response = await fetch(`/api/users/${userId}`, { method: "DELETE" });
     if (response.ok) {
       alert("User deleted successfully");
-      localStorage.removeItem(`users-page-${currentPage}`); // Invalidate the cache for the current page
-      fetchUsers(currentPage); // Re-fetch users after deletion
+      localStorage.removeItem(`users-page-${currentPage}`); // Invalidate cache
+      fetchUsers(currentPage); // Re-fetch
     } else {
       alert("Failed to delete user");
     }
   };
 
-  // Handle password change for a selected user
+  // Password change
   const handleChangePassword = async (newPassword: string) => {
     if (!selectedUser) return;
 
@@ -119,13 +109,12 @@ const UsersPage = () => {
 
     if (response.ok) {
       alert("Password changed successfully");
-      fetchUsers(currentPage); // Re-fetch users after password change
+      fetchUsers(currentPage);
     } else {
       alert("Failed to change password");
     }
   };
 
-  // Open the modal to change the password
   const openChangePasswordModal = (userId: string) => {
     setSelectedUser(userId);
     setIsModalOpen(true);
@@ -148,7 +137,7 @@ const UsersPage = () => {
       </div>
 
       {loading || sessionLoading ? (
-        <Loading /> // Use the loading component when data is being fetched
+        <Loading />
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {users.length === 0 ? (

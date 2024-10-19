@@ -13,7 +13,7 @@ interface DashboardCardProps {
 
 const DashboardCard: React.FC<DashboardCardProps> = ({ link, icon, title, value, bgColor }) => {
     return (
-        <div className={`bg-${bgColor} w-full max-w-xs p-4 rounded-lg shadow-md transition-transform transform hover:scale-105`}>
+        <div className={`${bgColor} w-full max-w-xs p-4 rounded-lg shadow-md transition-transform transform hover:scale-105`}>
             <Link href={link} className="block text-center">
                 <div className="flex justify-center mb-2">
                     {icon}

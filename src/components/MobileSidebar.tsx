@@ -5,7 +5,11 @@ import { MdDashboard } from 'react-icons/md';
 import { signOut, getSession } from 'next-auth/react';
 import Image from 'next/image';  // Import next/image
 
-const MobileSidebar = () => {
+interface MyComponentProps {
+    bgColor: string;
+  }
+
+const MobileSidebar: React.FC<MyComponentProps> = ({ bgColor  }) => {
     const [menuOpen, setMenuOpen] = useState(false);
     // const [inventoryDropdown, setInventoryDropdown] = useState(false);
     const [userRole, setUserRole] = useState<string | null>(null); // Allow string or null
@@ -22,7 +26,7 @@ const MobileSidebar = () => {
     }, []);
 
     return (
-        <nav className="bg-gray-800 text-white relative">
+        <nav className={`${bgColor} text-white relative rounded-b-lg`}>
             <div className="container mx-auto flex items-center justify-between px-4 py-3">
                 {/* Logo */}
                 <div className="flex items-center">
@@ -50,7 +54,7 @@ const MobileSidebar = () => {
 
             {/* Full-Screen Overlay Menu */}
             {menuOpen && (
-                <div className="fixed inset-0 bg-gray-900 bg-opacity-95 z-50">
+                <div className={`fixed inset-0 bg-gray-900 ${bgColor} z-50`}>
                     <div className='flex items-center justify-end mr-10 pt-5'>
                         <button
                             onClick={() => setMenuOpen(!menuOpen)}

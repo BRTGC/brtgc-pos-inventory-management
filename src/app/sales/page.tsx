@@ -26,18 +26,19 @@ const Page = () => {
     const [sales, setSales] = useState<Sale[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
+    const [isFreshDataLoading, setIsFreshDataLoading] = useState<boolean>(false);
 
     // Check if the session is still loading
     const sessionLoading = useCheckSessionData();
 
     useEffect(() => {
-        // Only fetch sales if session check is complete
         const fetchSales = async () => {
+            setIsFreshDataLoading(true); // Indicate that fresh data is being loaded
             try {
-                // First, check for cached data
+                // Use cached sales data first
                 const cachedSales = localStorage.getItem('salesData');
                 if (cachedSales) {
-                    setSales(JSON.parse(cachedSales)); // Set cached sales if available
+                    setSales(JSON.parse(cachedSales)); // Set cached sales
                 }
 
                 const response = await fetch('/api/sales/all-sales');
@@ -53,7 +54,7 @@ const Page = () => {
                 // Cache the fetched sales data in local storage
                 localStorage.setItem('salesData', JSON.stringify(data));
             } catch (err) {
-                // Ensure err is treated as an instance of Error
+                // Handle error
                 if (err instanceof Error) {
                     console.error('Fetch error:', err.message); // Log the error for debugging
                     setError(err.message || 'Unknown error occurred');
@@ -62,6 +63,7 @@ const Page = () => {
                 }
             } finally {
                 setLoading(false);
+                setIsFreshDataLoading(false); // Reset the loading state for fresh data
             }
         };
 
@@ -70,7 +72,7 @@ const Page = () => {
         }
     }, [sessionLoading]);
 
-    if (loading || sessionLoading) {
+    if (loading || sessionLoading || isFreshDataLoading) {
         return <Loading />; // Use your custom Loading component
     }
 

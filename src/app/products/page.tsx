@@ -1,10 +1,10 @@
-// /app/products/page.tsx
-"use client"
+"use client";
 
 import withLayout from '@/components/withLayout';
 import { getSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import useSWR from 'swr';
 import Loading from '@/components/Loading';  // Import your Loading component
 
 // Define a type for the Product
@@ -28,73 +28,66 @@ type Session = {
   user: SessionUser;
 } | null;
 
+const fetcher = (url: string) => fetch(url).then(res => res.json());
+
 const ProductsPage = () => {
   const router = useRouter();
-  const [products, setProducts] = useState<Product[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [sortOrder, setSortOrder] = useState<string>('name');
   const [session, setSession] = useState<Session>(null);
-  const [loading, setLoading] = useState<boolean>(true);  // Add loading state for fetching
+  const [loadingSession, setLoadingSession] = useState<boolean>(true);
 
-  // Fetch products and session data when the component mounts
+  // Fetch products with SWR
+  const { data: products, error } = useSWR<Product[]>(`${process.env.NEXT_PUBLIC_BASE_URL}/api/products/get-all`, fetcher, { refreshInterval: 3000 });
+
+  // Fetch session data when the component mounts
   useEffect(() => {
-    const fetchProducts = async () => {
-      setLoading(true);  // Start loading
-      const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/products/get-all`, {
-        cache: 'no-cache', // Optional: Ensure fresh data
-      });
-      const initialProducts: Product[] = await res.json();
-      setProducts(initialProducts);
-      setFilteredProducts(initialProducts); // Initialize filtered products
-      setLoading(false); // Stop loading
-    };
-
     const fetchSession = async () => {
-      setLoading(true);  // Start loading session
       const sessionData = await getSession();
       setSession(sessionData as Session); // Use type assertion here
+      setLoadingSession(false);
 
       if (!sessionData) {
         router.push("/auth/login"); // Redirect to sign in if not authenticated
       }
-      setLoading(false);  // Stop loading session
     };
 
-    fetchProducts();
     fetchSession();
   }, [router]);
 
   useEffect(() => {
-    const applyFilters = () => {
-      let updatedProducts = products;
-
-      if (searchTerm) {
-        updatedProducts = updatedProducts.filter(product =>
-          product.name.toLowerCase().includes(searchTerm.toLowerCase())
-        );
-      }
-
-      if (selectedCategory) {
-        updatedProducts = updatedProducts.filter(product =>
-          product.category === selectedCategory
-        );
-      }
-
-      if (sortOrder === 'price_asc') {
-        updatedProducts.sort((a, b) => a.price - b.price);
-      } else if (sortOrder === 'price_desc') {
-        updatedProducts.sort((a, b) => b.price - a.price);
-      } else {
-        updatedProducts.sort((a, b) => a.name.localeCompare(b.name));
-      }
-
-      setFilteredProducts(updatedProducts);
-    };
-
-    applyFilters();
+    if (products) {
+      applyFilters(products); // Only apply filters when products are fetched
+    }
   }, [searchTerm, selectedCategory, sortOrder, products]);
+
+  const applyFilters = (products: Product[]) => {
+    let updatedProducts = products;
+
+    if (searchTerm) {
+      updatedProducts = updatedProducts.filter(product =>
+        product.name.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    if (selectedCategory) {
+      updatedProducts = updatedProducts.filter(product =>
+        product.category === selectedCategory
+      );
+    }
+
+    if (sortOrder === 'price_asc') {
+      updatedProducts.sort((a, b) => a.price - b.price);
+    } else if (sortOrder === 'price_desc') {
+      updatedProducts.sort((a, b) => b.price - a.price);
+    } else {
+      updatedProducts.sort((a, b) => a.name.localeCompare(b.name));
+    }
+
+    setFilteredProducts(updatedProducts);
+  };
 
   const handleDelete = async (id: number) => {
     try {
@@ -104,7 +97,7 @@ const ProductsPage = () => {
         body: JSON.stringify({ id }),
       });
       if (!res.ok) throw new Error('Failed to delete product');
-      setProducts(products.filter(product => product.id !== id));
+      setFilteredProducts(filteredProducts.filter(product => product.id !== id));
     } catch (error) {
       console.log(error);
     }
@@ -114,8 +107,18 @@ const ProductsPage = () => {
     router.push(`/products/edit/${id}`);
   };
 
-  // If loading session or products, display <Loading /> component
-  if (loading) {
+  // Show loading component if session is loading
+  if (loadingSession) {
+    return <Loading />;
+  }
+
+  // Handle error in product fetching
+  if (error) {
+    return <div>Error fetching products.</div>;
+  }
+
+  // If products are still loading
+  if (!products) {
     return <Loading />;
   }
 
@@ -223,5 +226,4 @@ const ProductsPage = () => {
   );
 };
 
-// Export component wrapped with layout
 export default withLayout(ProductsPage);
