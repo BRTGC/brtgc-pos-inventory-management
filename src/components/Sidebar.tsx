@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
-import { FiSettings, FiUser, FiLogOut, FiPackage } from 'react-icons/fi';
-import { FaShoppingCart, FaFileAlt, FaUser } from 'react-icons/fa';
+import { FiLogOut, FiPackage } from 'react-icons/fi';
+import { FaShoppingCart, FaUser } from 'react-icons/fa';
 import { MdDashboard } from 'react-icons/md';
 import { getSession, signOut } from 'next-auth/react';
 import Image from 'next/image';
+import ThemeToggle from './ThemeToggle';
 
 interface MyComponentProps {
   bgColor: string;
@@ -25,7 +26,7 @@ const Navbar: React.FC<MyComponentProps> = ({ bgColor  }) => {
   }, []);
 
   return (
-    <nav className={`${bgColor} fixed text-white px-4 py-3 w-full rounded-b-lg`}>
+    <nav className={`${bgColor} fixed text-white px-4 py-3 w-full rounded-b-lg z-50`}>
       <div className="container mx-auto flex items-center justify-around">
         {/* Logo */}
         <div className="flex items-center">
@@ -112,7 +113,7 @@ const Navbar: React.FC<MyComponentProps> = ({ bgColor  }) => {
         <div className='flex items-center gap-8'>
 
           {/* lightt and dark mode */}
-          
+          <ThemeToggle />
 
           {/* Logout */}
           <button
