@@ -254,7 +254,7 @@ const Dashboard = () => {
 
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold text-center mb-6">
+      <h1 className="text-2xl text-right font-bold mb-6 mr-[5%] text-gray-800 dark:text-gray-200">
         Welcome, <span className="font-bold uppercase">{user.username}</span>
       </h1>
 

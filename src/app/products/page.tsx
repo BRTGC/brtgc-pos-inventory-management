@@ -125,11 +125,11 @@ const ProductsPage = () => {
   return (
     <div className="max-w-6xl mx-auto p-4">
       <div className='flex flex-col sm:flex-row justify-between items-center my-4 p-4'>
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 text-center sm:text-left mb-4 sm:mb-0">Product List</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold text-center sm:text-left mb-4 sm:mb-0 text-gray-800 dark:text-gray-200">Product List</h1>
         {session?.user.role === 'ADMIN' && (
           <a
             href="/products/add-new"
-            className='bg-blue-500 hover:bg-blue-600 sm:px-6 px-4 sm:py-3 py-2 text-white text-base sm:text-lg font-semibold rounded-md transition duration-200'
+            className='bg-blue-500 hover:bg-blue-600 sm:px-6 px-4 sm:py-3 py-2 text-gray-600 dark:text-gray-400" text-base sm:text-lg font-semibold rounded-md transition duration-200'
           >
             Add Product
           </a>
@@ -141,7 +141,7 @@ const ProductsPage = () => {
           placeholder="Search products..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="border rounded-lg py-2 px-4 w-full"
+          className="border rounded-lg py-2 px-4 w-full text-black outline-none"
         />
       </div>
 
@@ -152,7 +152,7 @@ const ProductsPage = () => {
             id="categorySelect"
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
-            className="border rounded-lg p-2"
+            className="border rounded-lg p-2 text-black"
             aria-label="Filter by category"
           >
             <option value="">All Categories</option>
@@ -166,7 +166,7 @@ const ProductsPage = () => {
             id="sortSelect"
             value={sortOrder}
             onChange={(e) => setSortOrder(e.target.value)}
-            className="border rounded-lg p-2"
+            className="border rounded-lg p-2 text-black"
             aria-label="Sort by"
           >
             <option value="name">Name</option>
@@ -176,14 +176,14 @@ const ProductsPage = () => {
         </div>
       </div>
 
-      <div className="bg-gray-100 p-4">
+      <div className="p-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredProducts.map((product) => (
-            <div key={product.id} className="border rounded-lg p-4 shadow-md relative">
-              <a className="text-xl font-semibold text-blue-500" href='#'>{product.name}</a>
-              <p className="text-gray-700">Price: ${product.price.toFixed(2)}</p>
-              <p className="text-gray-600">SKU: {product.sku}</p>
-              <p className="text-gray-600">Stock: {product.stock}</p>
+            <div key={product.id} className="bg-white dark:bg-gray-700 border rounded-lg p-4 shadow-lg dark:shadow-md relative">
+              <a className="text-xl font-semibold text-gray-800 dark:text-gray-200" href='#'>{product.name}</a>
+              <p className="text-gray-600 dark:text-gray-400">Price: ${product.price.toFixed(2)}</p>
+              <p className="text-gray-600 dark:text-gray-400">SKU: {product.sku}</p>
+              <p className="text-gray-600 dark:text-gray-400">Stock: {product.stock}</p>
 
               {/* Low stock alert */}
               {product.stock <= product.lowStockAlert && (

@@ -102,8 +102,8 @@ const EditProductPage = ({ params }: EditProductPageProps) => {
   }
 
   return (
-    <div className="max-w-6xl mx-auto p-4">
-      <h1 className="text-3xl font-bold mb-4">Edit Product</h1>
+    <div className="max-w-6xl mx-auto p-4 bg-white dark:bg-gray-700">
+      <h1 className="text-3xl font-bold mb-4 text-gray-800 dark:text-gray-200">Edit Product</h1>
       <form onSubmit={handleSubmit(onSubmit)}>
         {/* Product Name */}
         <div className="mb-4">
@@ -114,7 +114,7 @@ const EditProductPage = ({ params }: EditProductPageProps) => {
             title="Enter product name"
             placeholder="Enter product name"
             {...register('name', { required: true })}
-            className="border rounded-lg py-2 px-4 w-full"
+            className="border rounded-lg py-2 px-4 w-full text-black"
             required
           />
         </div>
@@ -127,7 +127,7 @@ const EditProductPage = ({ params }: EditProductPageProps) => {
             title="Enter product description"
             placeholder="Enter product description"
             {...register('description', { required: true })}
-            className="border rounded-lg py-2 px-4 w-full"
+            className="border rounded-lg py-2 px-4 w-full text-black"
             required
           />
         </div>
@@ -141,7 +141,7 @@ const EditProductPage = ({ params }: EditProductPageProps) => {
             title="Enter product price"
             placeholder="Enter product price"
             {...register('price', { required: true })}
-            className="border rounded-lg py-2 px-4 w-full"
+            className="border rounded-lg py-2 px-4 w-full text-black"
             required
           />
         </div>
@@ -155,7 +155,7 @@ const EditProductPage = ({ params }: EditProductPageProps) => {
             title="Enter cost price"
             placeholder="Enter cost price"
             {...register('costPrice', { required: true })}
-            className="border rounded-lg py-2 px-4 w-full"
+            className="border rounded-lg py-2 px-4 w-full text-black"
             required
           />
         </div>
@@ -169,7 +169,7 @@ const EditProductPage = ({ params }: EditProductPageProps) => {
             title="Enter SKU"
             placeholder="Enter SKU"
             {...register('sku', { required: true })}
-            className="border rounded-lg py-2 px-4 w-full"
+            className="border rounded-lg py-2 px-4 w-full text-black"
             required
           />
         </div>
@@ -183,7 +183,7 @@ const EditProductPage = ({ params }: EditProductPageProps) => {
             title="Enter product category"
             placeholder="Enter product category"
             {...register('category', { required: true })}
-            className="border rounded-lg py-2 px-4 w-full"
+            className="border rounded-lg py-2 px-4 w-full text-black"
             required
           />
         </div>
@@ -197,7 +197,7 @@ const EditProductPage = ({ params }: EditProductPageProps) => {
             title="Enter stock quantity"
             placeholder="Enter stock quantity"
             {...register('stock', { required: true })}
-            className="border rounded-lg py-2 px-4 w-full"
+            className="border rounded-lg py-2 px-4 w-full text-black"
             required
           />
         </div>
@@ -211,7 +211,7 @@ const EditProductPage = ({ params }: EditProductPageProps) => {
             title="Enter low stock alert threshold"
             placeholder="Enter low stock alert threshold"
             {...register('lowStockAlert', { required: true })}
-            className="border rounded-lg py-2 px-4 w-full"
+            className="border rounded-lg py-2 px-4 w-full text-black"
             required
           />
         </div>

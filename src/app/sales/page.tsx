@@ -87,19 +87,19 @@ const Page = () => {
     return (
         <div className="container mx-auto p-4">
             <div className="flex flex-col md:flex-row md:justify-between items-center mb-4">
-                <h1 className="text-2xl font-bold mb-2 md:mb-0 text-center md:text-left">Sales List</h1>
+                <h1 className="text-2xl font-bold mb-2 md:mb-0 text-center md:text-left text-gray-800 dark:text-gray-200">Sales List</h1>
                 <div>
                     <a
                         href="/sales/add-sale"
-                        className="bg-blue-500 hover:bg-blue-600 sm:px-6 px-4 sm:py-3 py-2 text-white text-base sm:text-lg font-semibold rounded-md transition duration-200"
+                        className="bg-blue-500 hover:bg-blue-600 sm:px-6 px-4 sm:py-3 py-2 text-gray-600 dark:text-gray-400 text-base sm:text-lg font-semibold rounded-md transition duration-200"
                     >
                         Add Sale
                     </a>
                 </div>
             </div>
-            <div className="overflow-x-auto">
-                <table className="min-w-full border border-gray-300 bg-white shadow-md rounded-lg">
-                    <thead className="bg-gray-200">
+            <div className="overflow-x-auto rounded-lg">
+                <table className="min-w-full border border-gray-300 bg-white dark:bg-gray-700 shadow-md rounded-lg">
+                    <thead className="bg-gray-100 dark:bg-gray-600">
                         <tr>
                             <th className="border px-4 py-2">Sale ID</th>
                             <th className="border px-4 py-2">Timestamp</th>
@@ -115,7 +115,7 @@ const Page = () => {
                                 0
                             );
                             return (
-                                <tr key={sale.id} className="hover:bg-gray-100">
+                                <tr key={sale.id} className="hover:bg-gray-100 text-black">
                                     <td className="border px-4 py-2">{sale.id}</td>
                                     <td className="border px-4 py-2">
                                         {new Date(sale.createdAt).toLocaleString()}

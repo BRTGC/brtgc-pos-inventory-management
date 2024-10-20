@@ -153,8 +153,8 @@ const NewSalePage: React.FC = () => {
     };
 
     return (
-        <div className="container mx-auto p-4 max-w-3xl">
-            <h1 className="text-4xl font-semibold text-center text-gray-800 mb-10">Create New Sale</h1>
+        <div className="container mx-auto p-4 max-w-3xl h-screen text-black">
+            <h1 className="text-4xl font-semibold text-center text-gray-800 dark:text-gray-200 mb-10">Create New Sale</h1>
             <form onSubmit={handleSubmit} className="space-y-8 bg-white shadow-lg rounded-lg p-8">
                 {message && <p className="text-center text-red-500 font-medium">{message}</p>}
 
@@ -168,7 +168,7 @@ const NewSalePage: React.FC = () => {
                         id="productSearch"
                         value={searchTerm}
                         onChange={handleSearchChange}
-                        className="block w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-indigo-500 focus:border-indigo-500"
+                        className="block w-full border border-gray-300 outline-none rounded-lg px-4 py-2 focus:ring-indigo-500 focus:border-indigo-500"
                         placeholder="Type to search product..."
                     />
                     {searchTerm && filteredProducts.length > 0 && (

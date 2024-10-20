@@ -4,6 +4,7 @@ import { FaShoppingCart, FaFileAlt, FaUser } from 'react-icons/fa';
 import { MdDashboard } from 'react-icons/md';
 import { signOut, getSession } from 'next-auth/react';
 import Image from 'next/image';  // Import next/image
+import ThemeToggle from './ThemeToggle';
 
 interface MyComponentProps {
     bgColor: string;
@@ -26,7 +27,7 @@ const MobileSidebar: React.FC<MyComponentProps> = ({ bgColor  }) => {
     }, []);
 
     return (
-        <nav className={`${bgColor} text-white relative rounded-b-lg`}>
+        <nav className="bg-[#2D3748] dark:bg-[#1A202C] text-white relative rounded-b-lg">
             <div className="container mx-auto flex items-center justify-between px-4 py-3">
                 {/* Logo */}
                 <div className="flex items-center">
@@ -146,8 +147,8 @@ const MobileSidebar: React.FC<MyComponentProps> = ({ bgColor  }) => {
                             Sales
                         </a>
 
-                        {/* Reports */}
-                        <a
+                        {/* Reports
+                         <a
                             href="/reports/restocking"
                             className="flex items-center px-4 py-2 hover:bg-gray-700 transition-colors"
                         >
@@ -155,7 +156,7 @@ const MobileSidebar: React.FC<MyComponentProps> = ({ bgColor  }) => {
                             Restocking Report
                         </a>
 
-                        {/* Profile */}
+                        Profile 
                         <a
                             href="/profile"
                             className="flex items-center px-4 py-2 hover:bg-gray-700 transition-colors"
@@ -164,14 +165,16 @@ const MobileSidebar: React.FC<MyComponentProps> = ({ bgColor  }) => {
                             Profile
                         </a>
 
-                        {/* Settings */}
+                         Settings 
                         <a
                             href="/settings"
                             className="flex items-center px-4 py-2 hover:bg-gray-700 transition-colors"
                         >
                             <FiSettings className="inline mr-2" size={20} />
                             Settings
-                        </a>
+                        </a> */}
+
+                        <ThemeToggle />
 
                         {/* Logout */}
                         <button

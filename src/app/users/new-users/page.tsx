@@ -36,12 +36,12 @@ const page = () => {
     };
 
     return (
-        <div className="flex items-center justify-center min-h-screen bg-gray-100">
+        <div className="flex items-center justify-center min-h-screen text-black">
             <form
                 onSubmit={handleSubmit(onSubmit)}
-                className="bg-white p-8 rounded-lg shadow-md w-full max-w-md"
+                className="bg-white dark:bg-gray-700 p-8 rounded-lg shadow-md w-full max-w-md"
             >
-                <h2 className="text-2xl font-bold text-center mb-6">Add New User</h2>
+                <h2 className="text-2xl text-gray-800 dark:text-gray-200 font-bold text-center mb-6">Add New User</h2>
 
                 {/* Name Field */}
                 <div className="mb-4">

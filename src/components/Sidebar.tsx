@@ -6,11 +6,7 @@ import { getSession, signOut } from 'next-auth/react';
 import Image from 'next/image';
 import ThemeToggle from './ThemeToggle';
 
-interface MyComponentProps {
-  bgColor: string;
-}
-
-const Navbar: React.FC<MyComponentProps> = ({ bgColor  }) => {
+const Navbar = () => {
   // const [inventoryDropdown, setInventoryDropdown] = useState(false);
   const [userRole, setUserRole] = useState<string | null>(null); // Allow string or null
 
@@ -26,7 +22,7 @@ const Navbar: React.FC<MyComponentProps> = ({ bgColor  }) => {
   }, []);
 
   return (
-    <nav className={`${bgColor} fixed text-white px-4 py-3 w-full rounded-b-lg z-50`}>
+    <nav className={`bg-[#2D3748] dark:bg-[#1A202C] fixed text-white px-4 py-3 w-full rounded-b-lg z-50`}>
       <div className="container mx-auto flex items-center justify-around">
         {/* Logo */}
         <div className="flex items-center">

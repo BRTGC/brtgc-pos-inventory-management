@@ -1,17 +1,20 @@
 // src/components/ThemeToggle.tsx
-import { useTheme } from '../context/ThemeContext';
+import { useContext } from 'react';
+import { ThemeContext } from '../context/ThemeContext';
 
-const ThemeToggle = () => {
-  const { theme, toggleTheme } = useTheme();
+export default function ThemeToggle() {
+  const themeContext = useContext(ThemeContext);
+
+  if (!themeContext) return null;
+
+  const { theme, toggleTheme } = themeContext;
 
   return (
     <button
       onClick={toggleTheme}
-      className="p-2 rounded-md bg-gray-200 dark:bg-gray-800 text-gray-800 dark:text-gray-200"
+      className="px-4 py-2 bg-gray-300 dark:bg-gray-700 text-black dark:text-white rounded"
     >
-      {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+      {theme === 'light' ? 'Dark Mode' : 'Light Mode'}
     </button>
   );
-};
-
-export default ThemeToggle;
+}

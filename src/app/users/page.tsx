@@ -123,13 +123,13 @@ const UsersPage = () => {
   return (
     <div className="container mx-auto p-6">
       <div className="flex flex-col md:flex-row justify-between items-center mb-6">
-        <h1 className="text-4xl font-bold text-center md:text-left mb-4 md:mb-0">
+        <h1 className="text-4xl font-bold text-center text-gray-800 dark:text-gray-200 md:text-left mb-4 md:mb-0">
           User Directory
         </h1>
         {userRole === "ADMIN" && (
           <a
             href="/users/new-users"
-            className="bg-blue-600 text-white font-semibold py-2 px-4 rounded transition duration-300 hover:bg-blue-700"
+            className="bg-blue-600 text-gray-600 dark:text-gray-400 font-semibold py-2 px-4 rounded transition duration-300 hover:bg-blue-700"
           >
             Add New User
           </a>
@@ -148,15 +148,15 @@ const UsersPage = () => {
             users.map((user) => (
               <div
                 key={user.id}
-                className="bg-white shadow-lg rounded-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 p-4"
+                className="bg-white dark:bg-gray-700 shadow-lg rounded-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 p-4"
               >
-                <h2 className="text-xl font-semibold text-blue-600">{user.name}</h2>
-                <p className="text-gray-700">{user.username}</p>
-                <p className="text-gray-500">{user.email}</p>
-                <p className="text-gray-400 text-sm">
+                <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">{user.name}</h2>
+                <p className="text-gray-600 dark:text-gray-400">{user.username}</p>
+                <p className="text-gray-600 dark:text-gray-400">{user.email}</p>
+                <p className="text-gray-600 dark:text-gray-400 text-sm">
                   Joined: {new Date(user.createdAt).toLocaleDateString()}
                 </p>
-                <div className="flex justify-between mt-4">
+                {/* <div className="flex justify-between mt-4">
                   <button
                     onClick={() => openChangePasswordModal(user.id)}
                     className="bg-yellow-500 text-white font-semibold py-1 px-3 rounded hover:bg-yellow-600"
@@ -171,7 +171,7 @@ const UsersPage = () => {
                       Delete
                     </button>
                   )}
-                </div>
+                </div> */}
               </div>
             ))
           )}
