@@ -39,7 +39,6 @@ const NewSalePage: React.FC = () => {
                 setFilteredProducts(data);
             } catch (error) {
                 console.error(error);
-                alert('Failed to load products');
             }
         };
         fetchProducts();

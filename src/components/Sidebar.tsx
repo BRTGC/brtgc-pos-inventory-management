@@ -114,7 +114,7 @@ const Navbar = () => {
           {/* Logout */}
           <button
             onClick={() => signOut()}
-            className="flex items-center px-4 py-2 hover:bg-gray-700 transition-colors"
+            className="flex items-center px-4 py-2 hover:bg-gray-700 rounded-md transition-colors"
             type="button" // Set button type explicitly
           >
             <FiLogOut className="inline mr-2" size={20} />

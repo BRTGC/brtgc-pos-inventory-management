@@ -40,7 +40,7 @@ const AddNewProduct = () => {
   };
 
   return (
-    <div className="max-w-md mx-auto p-6 bg-white dark:bg-gray-700 rounded-lg shadow-lg border border-gray-200">
+    <div className="max-w-md mx-auto p-6 bg-white dark:bg-gray-700 rounded-lg shadow-lg border border-gray-200 m-10">
       <h1 className="text-3xl font-bold text-center mb-6 text-gray-800 dark:text-gray-200">Add New Product</h1>
       <form onSubmit={handleSubmit(onSubmit)}>
         <div className="mb-4">
@@ -51,7 +51,7 @@ const AddNewProduct = () => {
             id="name"
             {...register('name', { required: true })}
             placeholder="Enter product name"
-            className="mt-1 block w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-400 transition duration-150 ease-in-out"
+            className="mt-1 block w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-400 transition duration-150 ease-in-out text-black"
           />
         </div>
         <div className="mb-4">
@@ -62,7 +62,7 @@ const AddNewProduct = () => {
             id="description"
             {...register('description', { required: true })}
             placeholder="Enter product description"
-            className="mt-1 block w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-400 transition duration-150 ease-in-out"
+            className="mt-1 block w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-400 transition duration-150 ease-in-out text-black"
           />
         </div>
         <div className="mb-4">
@@ -74,7 +74,7 @@ const AddNewProduct = () => {
             id="price"
             {...register('price', { required: true, valueAsNumber: true })}
             placeholder="Enter price"
-            className="mt-1 block w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-400 transition duration-150 ease-in-out"
+            className="mt-1 block w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-400 transition duration-150 ease-in-out text-black"
           />
         </div>
         <div className="mb-4">
@@ -86,7 +86,7 @@ const AddNewProduct = () => {
             id="costPrice"
             {...register('costPrice', { required: true, valueAsNumber: true })}
             placeholder="Enter cost price"
-            className="mt-1 block w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-400 transition duration-150 ease-in-out"
+            className="mt-1 block w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-400 transition duration-150 ease-in-out text-black"
           />
         </div>
         <div className="mb-4">
@@ -97,7 +97,7 @@ const AddNewProduct = () => {
             id="sku"
             {...register('sku', { required: true })}
             placeholder="Enter SKU"
-            className="mt-1 block w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-400 transition duration-150 ease-in-out"
+            className="mt-1 block w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-400 transition duration-150 ease-in-out text-black"
           />
         </div>
         <div className="mb-4">
@@ -108,7 +108,7 @@ const AddNewProduct = () => {
             id="category"
             {...register('category', { required: true })}
             placeholder="Enter category"
-            className="mt-1 block w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-400 transition duration-150 ease-in-out"
+            className="mt-1 block w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-400 transition duration-150 ease-in-out text-black"
           />
         </div>
         <div className="mb-4">
@@ -120,7 +120,7 @@ const AddNewProduct = () => {
             id="stock"
             {...register('stock', { required: true, valueAsNumber: true })}
             placeholder="Enter stock quantity"
-            className="mt-1 block w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-400 transition duration-150 ease-in-out"
+            className="mt-1 block w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-400 transition duration-150 ease-in-out text-black"
           />
         </div>
         <div className="mb-4">
@@ -132,7 +132,7 @@ const AddNewProduct = () => {
             id="lowStockAlert"
             {...register('lowStockAlert', { required: true, valueAsNumber: true })}
             placeholder="Enter low stock alert threshold"
-            className="mt-1 block w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-400 transition duration-150 ease-in-out"
+            className="mt-1 block w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-400 transition duration-150 ease-in-out text-black"
           />
         </div>
         <button type="submit" className="w-full py-3 px-4 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-400">
